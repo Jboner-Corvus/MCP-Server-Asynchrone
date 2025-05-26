@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://placehold.co/600x200/1a202c/ffffff?text=🚀%20FastMCP%2B%2B%20Server%20🚀&font=montserrat" alt="Bannière FastMCP++ Server">
-  <h1><font color="#2ECC71">FastMCP++ Server</font></h1>
+  <h1><font color="#2ECC71">MCP-Serveur</font></h1>
   <p><strong>Un serveur modulaire et extensible pour opérations synchrones et asynchrones.</strong></p>
   <p>Propulsé par Docker, BullMQ, Redis et FastMCP.</p>
   <p>
@@ -31,7 +31,7 @@
 
 ## 🌟 <font color="#3498DB">Introduction</font>
 
-**FastMCP++** est une solution serveur robuste, conçue pour la performance et la modularité. Elle permet de gérer avec élégance des tâches complexes, qu'elles soient immédiates (synchrones) ou de longue durée (asynchrones), grâce à une architecture découplée s'appuyant sur :
+**MCP-Serveur** est un serveur robuste, conçue pour la performance et la modularité. Il permet de gérer avec élégance des tâches complexes, qu'elles soient immédiates (synchrones) ou de longue durée (asynchrones), grâce à une architecture découplée s'appuyant sur :
 
 -   **FastMCP** : Pour un traitement efficace des requêtes et une gestion de session.
 -   **Docker & Docker Compose** : Pour une conteneurisation fiable et un déploiement simplifié.
