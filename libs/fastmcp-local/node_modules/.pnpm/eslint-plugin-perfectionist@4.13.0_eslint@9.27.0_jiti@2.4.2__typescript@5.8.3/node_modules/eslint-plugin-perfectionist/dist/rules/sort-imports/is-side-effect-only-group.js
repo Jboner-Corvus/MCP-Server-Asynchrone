@@ -1,0 +1,13 @@
+'use strict'
+Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+const isNewlinesBetweenOption = require('../../utils/is-newlines-between-option.js')
+let isSideEffectOnlyGroup = group => {
+  if (isNewlinesBetweenOption.isNewlinesBetweenOption(group)) {
+    return false
+  }
+  if (typeof group === 'string') {
+    return group === 'side-effect' || group === 'side-effect-style'
+  }
+  return group.every(isSideEffectOnlyGroup)
+}
+exports.isSideEffectOnlyGroup = isSideEffectOnlyGroup

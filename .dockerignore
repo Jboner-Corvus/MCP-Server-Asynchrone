@@ -1,0 +1,11 @@
+node_modules
+logs
+*.log
+dist
+coverage
+.vscode
+.idea
+.DS_Store
+*.env.*.local
+.env.local
+README.md

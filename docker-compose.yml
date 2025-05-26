@@ -1,0 +1,102 @@
+# --- docker-compose.yml ---
+# Définit les services, réseaux et volumes pour l'application FastMCP.
+
+services:
+  # Service Redis pour la mise en cache et la file d'attente BullMQ
+  redis:
+    image: redis:7.2-alpine # Utilisation d'une version spécifique pour la reproductibilité
+    container_name: fastmcp_redis
+    ports:
+      # Mappe le port de l'hôte au port du conteneur pour Redis.
+      # Utilise les variables d'environnement de .env avec des valeurs par défaut.
+      - "${REDIS_PORT_HOST:-6379}:${REDIS_PORT_CONTAINER:-6379}"
+    volumes:
+      # Monte un volume nommé pour la persistance des données Redis.
+      - redis_data:/data
+    # Commande pour démarrer Redis avec protection par mot de passe.
+    # La variable REDIS_PASSWORD doit être définie dans le fichier .env.
+    command: redis-server --requirepass ${REDIS_PASSWORD?Variable REDIS_PASSWORD non définie dans .env} --save 60 1 --loglevel warning # Ajout de configuration pour la persistance et le niveau de log
+    healthcheck:
+      # Test pour vérifier si Redis est opérationnel.
+      test: ["CMD", "redis-cli", "-h", "127.0.0.1", "-p", "${REDIS_PORT_CONTAINER:-6379}", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s # Intervalle entre les vérifications
+      timeout: 5s   # Délai d'attente pour la réponse
+      retries: 5    # Nombre de tentatives avant de marquer comme non sain (augmenté)
+      start_period: 10s # Période de grâce initiale pour permettre à Redis de démarrer (augmenté)
+    restart: unless-stopped # Redémarre le service sauf s'il est arrêté manuellement
+    networks:
+      - app_net # Connecte le service au réseau défini ci-dessous
+    sysctls: # Optimisations potentielles pour Redis sous Docker
+      net.core.somaxconn: '511'
+
+  # Service principal de l'application FastMCP
+  fastmcp-server:
+    build:
+      context: . # Le contexte de build est le répertoire courant
+      dockerfile: Dockerfile # Utilise le Dockerfile à la racine du projet
+      args: # Permet de passer des arguments de build au Dockerfile
+        NODE_VERSION: 24-alpine # Version de Node.js
+        # Transmet la variable FASTMCP_SOURCE du fichier .env (ou 'local' par défaut si non définie)
+        # comme argument de build au Dockerfile.
+        FASTMCP_SOURCE: ${FASTMCP_SOURCE:-local} 
+    container_name: fastmcp_server_app
+    ports:
+      # Mappe le port de l'hôte (HOST_PORT) au port interne de l'application (PORT).
+      - "${HOST_PORT:-8081}:${PORT:-8081}"
+    env_file:
+      - .env # Charge les variables d'environnement depuis le fichier .env pour l'exécution
+    environment:
+      # Variables d'environnement spécifiques ou surcharges pour ce service à l'exécution.
+      # FASTMCP_SOURCE sera lue depuis .env par env_file pour l'exécution de l'application.
+      REDIS_HOST: redis # Le nom du service Redis sur le réseau Docker
+      REDIS_PORT: ${REDIS_PORT_CONTAINER:-6379} # Le port interne de Redis
+    depends_on:
+      redis:
+        condition: service_healthy # Attend que le service Redis soit sain avant de démarrer
+    restart: unless-stopped
+    healthcheck:
+      # Test pour utiliser le health check intégré de FastMCP.
+      # Utilise HEALTH_CHECK_PATH et PORT depuis .env (avec des valeurs par défaut).
+      # Le `$$` est pour échapper le `$` pour qu'il soit interprété par le shell dans le conteneur.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:${PORT:-8081}$${HEALTH_CHECK_PATH:-/health} || exit 1"]
+      interval: 20s 
+      timeout: 10s
+      retries: 3
+      start_period: 20s 
+    networks:
+      - app_net
+
+  # Service Worker pour les tâches asynchrones
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile # Utilise le même Dockerfile
+      args:
+        NODE_VERSION: 24-alpine
+        # Transmet également FASTMCP_SOURCE au worker, au cas où sa construction en dépendrait
+        # (même si l'application worker elle-même n'utilise peut-être pas fastmcp directement).
+        FASTMCP_SOURCE: ${FASTMCP_SOURCE:-local}
+    container_name: fastmcp_worker
+    command: pnpm run start:worker # Commande pour démarrer le worker avec pnpm
+    env_file:
+      - .env # Charge les variables d'environnement pour l'exécution du worker
+    environment:
+      # FASTMCP_SOURCE sera lue depuis .env par env_file pour l'exécution du worker.
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT_CONTAINER:-6379}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app_net
+
+# Définitions des volumes
+volumes:
+  redis_data: # Volume pour la persistance des données Redis
+    driver: local # Utilise le pilote de volume local par défaut
+
+# Définitions des réseaux
+networks:
+  app_net: # Réseau personnalisé pour la communication entre services
+    driver: bridge # Utilise le pilote de pont par défaut
