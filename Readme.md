@@ -58,8 +58,8 @@ Suivez ces étapes pour mettre en place votre environnement FastMCP++ :
 
 1.  **Clonez le Dépôt** :
     ```bash
-    git clone <URL_DU_DEPOT>
-    cd <NOM_DU_REPERTOIRE>
+    git clone [https://github.com/Jboner-Corvus/MCP-Server-Asynchrone.git](https://github.com/Jboner-Corvus/MCP-Server-Asynchrone.git)
+    cd MCP-Server-Asynchrone
     ```
 
 2.  **Configuration Initiale via `run.sh`** :
@@ -348,7 +348,7 @@ Le worker (`src/worker.ts`) est un composant essentiel pour la gestion des tâch
     * Si une `cbUrl` (URL de callback) est fournie lors de la mise en file d'attente d'une tâche, le worker peut :
         * Envoyer un webhook initial lorsque le traitement de la tâche commence (statut : `processing`).
         * Envoyer un webhook final à la fin de la tâche (statut : `completed` avec les résultats) ou en cas d'échec (statut : `error` avec les détails de l'erreur).
-    * Les webhooks sont signés en utilisant **HMAC SHA256** si la variable d'environnement `WEBHOOK_SECRET` est configurée, garantissant leur authenticité et intégrité. [cite:_SRC_UTILS_FILES.txt]
+    * Les webhooks sont signés en utilisant **HMAC SHA256** si la variable d'environnement `WEBHOOK_SECRET` est configurée, garantissant leur authenticité et intégrité.
 -   **Extensibilité pour de Nouveaux Outils Asynchrones** : Pour que le worker traite les tâches d'un nouvel outil asynchrone, vous devez :
     1.  Implémenter la logique métier spécifique de l'outil dans une fonction `doWork<NomDeVotreOutil>`.
     2.  Importer cette fonction et ses types associés dans `src/worker.ts`.
@@ -366,7 +366,7 @@ Le worker (`src/worker.ts`) est un composant essentiel pour la gestion des tâch
     * `WEBHOOK_SECRET`: <font color="#E74C3C">**Secret crucial**</font> pour la signature des webhooks sortants.
     * `FASTMCP_SOURCE`: Détermine si la bibliothèque FastMCP locale (`local`) ou une version npm (`remote`) est utilisée.
     * `LOG_LEVEL`: Définit la verbosité des logs de l'application (par exemple, `info`, `debug`, `error`).
-    * Consultez `src/.env.example` et `src/config.ts` pour toutes les options disponibles.
+    * Consultez `src/.env.example` (si fourni) et `src/config.ts` pour toutes les options disponibles.
 
 ---
 
