@@ -1,0 +1,10 @@
+# Exclude the run.sh script from language statistics
+run.sh linguist-generated
+
+# You might also want to exclude other configuration or build-related files if they skew results
+# For example, Dockerfile is already low, but if it were higher you could exclude it:
+# Dockerfile linguist-generated
+
+# If you have a separate folder for deployment scripts or generated files, you can exclude them:
+# deployment_scripts/ linguist-generated
+# generated_files/ linguist-generated
