@@ -126,8 +126,3 @@ Le serveur **MCP-Serveur** peut être facilement intégré avec **n8n** pour aut
 
 Les contributions sont les bienvenues ! ouvrez une *issue* pour discuter des changements que vous souhaitez apporter.
 
----
-
-<div align="center">
-  <p>🚀 Prêt à construire des applications puissantes avec FastMCP++ ! 🚀</p>
-</div>
