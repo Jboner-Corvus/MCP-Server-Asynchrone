@@ -87,13 +87,7 @@ Suivez ces étapes pour mettre en place votre environnement :
 Utilisez le script `run.sh` pour la majorité des opérations de gestion :
 
 - **Installer** : Options `1`,
-- **Démarrer/Arrêter des modules spécifiques** : Options `2`, `3`, `4`, `5`.
-- **Visualiser les journaux (logs)** : Option `11` ou lancez `run.sh --logs`.
-- **Reconstruire des modules** : Options `7`, `8`.
-- **Accéder au terminal d'un conteneur** : Option `12`.
-- **Exécuter des scripts PNPM (lint, test, etc.) sur l'hôte** : Option `16`.
-
-Le serveur applicatif s'exécute dans le conteneur Docker `fastmcp-server`, tandis que les tâches asynchrones sont traitées par un conteneur worker distinct, `worker`.
+- **Visualiser les journaux (logs)** : Option `11`.
 
 ---
 
