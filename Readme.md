@@ -19,11 +19,7 @@
 - [📋 Prérequis](#-prérequis)
 - [🚀 Installation & Configuration Initiale](#-installation--configuration-initiale)
 - [⚙️ Exécution et Gestion du Serveur](#️-exécution-et-gestion-du-serveur)
-- [✨ Extensibilité : Ajout de Nouveaux Outils](#-extensibilité--ajout-de-nouveaux-outils)
-  - [⚡ Ajout d'un Outil Asynchrone](#-ajout-dun-outil-asynchrone)
-  - [💡 Ajout d'un Outil Synchrone](#-ajout-dun-outil-synchrone)
-- [🛠️ Capacités du Worker Asynchrone](#️-capacités-du-worker-asynchrone)
-- [🔧 Développement & Configuration Avancée](#-développement--configuration-avancée)
+
 - [🤝 Contribution](#-contribution)
 
 ---
@@ -37,7 +33,7 @@
 - **BullMQ & Redis** : Pour une file d'attente de tâches asynchrones robuste et performante.
 - **TypeScript** : Pour un code typé, maintenable et évolutif.
 
-Ce document vous guidera à travers l'installation, l'exécution et l'extension du serveur FastMCP++.
+Ce document vous guidera à travers l'installation, l'exécution et l'extension du serveur.
 
 ---
 
@@ -53,7 +49,7 @@ Avant de commencer, assurez-vous que les éléments suivants sont installés et 
 
 ## 🚀 <font color="#3498DB">Installation & Configuration Initiale</font>
 
-Suivez ces étapes pour mettre en place votre environnement FastMCP++ :
+Suivez ces étapes pour mettre en place votre environnement :
 
 1.  **Clonez le Dépôt** :
 
