@@ -945,7 +945,7 @@ EOF
 
     while true; do
         echo -e "${FG_MAGENTA}╔═════════════════════════════════════════════════════════════════════════════╗${NC}"
-        echo -e "${FG_MAGENTA}║        ${FG_BRIGHT_WHITE}🤖 CONSOLE DE COMMANDEMENT - MCP (HTTP Streaming) v2.6 🤖         ${FG_MAGENTA}║${NC}" # Version
+        echo -e "${FG_MAGENTA}║        ${FG_BRIGHT_WHITE}🤖 CONSOLE DE COMMANDEMENT - MCP (HTTP Streaming) v0.0 🤖         ${FG_MAGENTA}║${NC}" # Version
         echo -e "${FG_MAGENTA}╠═════════════════════════════════════════════════════════════════════════════╣${NC}"
         printf "${FG_MAGENTA}║ ${FG_CYAN}%-2s ${FG_RED}%-70s${NC}${FG_MAGENTA}║${NC}\n" "1" "☣️ Nettoyage COMPLET (Supprime tout, Reconstruit, Démarre)"
         echo -e "${FG_MAGENTA}║ ${FG_DARK_GRAY}───────────────────────────────────────────────────────────────────────── ${FG_MAGENTA}║${NC}"

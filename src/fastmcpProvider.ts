@@ -65,7 +65,7 @@ export async function initializeFastMCP(): Promise<FastMCPModuleType> {
         missingComponents.push("l'exportation FastMCP (constructeur)");
       if (!(loadedModule && typeof loadedModule.UserError === 'function'))
         missingComponents.push("l'exportation UserError (classe)");
-      
+
       const errorMessageText = `[FastMCP Provider] Des exportations critiques sont manquantes ou mal typées dans le module FastMCP chargé depuis ${sourceDescription} : ${missingComponents.join(', ')}.`;
       logger.error(errorMessageText);
       throw new Error(errorMessageText);

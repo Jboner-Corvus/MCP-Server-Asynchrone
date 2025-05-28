@@ -223,6 +223,7 @@ Port ${config.PORT}.
     });
 
     server.on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       'toolError' as any,
       (ev: { error: Error; toolName: string; session: FastMCPSession<AuthData> }) => {
         const details = getSessLog(ev.session as AppRuntimeSession);

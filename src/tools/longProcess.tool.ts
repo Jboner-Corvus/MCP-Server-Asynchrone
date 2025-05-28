@@ -70,8 +70,7 @@ export const longProcessParams = z.object({
     .optional()
     .default(3)
     .describe('Nombre de messages à streamer pendant la tâche.'),
-  userId: 
-z
+  userId: z
     .string()
     .optional()
     .describe(

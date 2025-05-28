@@ -30,7 +30,10 @@ const envSchema = z.object({
     .describe("Chemin pour le point de terminaison de vérification de l'état."),
   [WEBHOOK_SECRET_ENV_VAR]: z // Utilise la constante pour le nom de la variable
     .string()
-    .min(32, `${WEBHOOK_SECRET_ENV_VAR} doit comporter au moins 32 caractères pour une sécurité adéquate.`),
+    .min(
+      32,
+      `${WEBHOOK_SECRET_ENV_VAR} doit comporter au moins 32 caractères pour une sécurité adéquate.`
+    ),
   FASTMCP_SOURCE: z
     .enum(['local', 'remote'])
     .default('local')
@@ -38,7 +41,9 @@ const envSchema = z.object({
   FASTMCP_REMOTE_VERSION: z
     .string()
     .optional()
-    .describe("Version cible pour le module FastMCP distant (ex: '2.1.3'). Utilisé si FASTMCP_SOURCE est 'remote'. Par défaut 'latest' si non défini dans fastmcpProvider."),
+    .describe(
+      "Version cible pour le module FastMCP distant (ex: '2.1.3'). Utilisé si FASTMCP_SOURCE est 'remote'. Par défaut 'latest' si non défini dans fastmcpProvider."
+    ),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -64,8 +69,10 @@ if (
     config.AUTH_TOKEN.length < 16) // Redondant avec min(16) mais bonne double vérification
 ) {
   console.error(
-    "ERREUR CRITIQUE DE SÉCURITÉ : AUTH_TOKEN est manquant, trop court, ou utilise une valeur par défaut en environnement de PRODUCTION."
+    'ERREUR CRITIQUE DE SÉCURITÉ : AUTH_TOKEN est manquant, trop court, ou utilise une valeur par défaut en environnement de PRODUCTION.'
   );
-  console.error("Veuillez définir un AUTH_TOKEN fort et unique dans votre fichier .env pour la production.");
+  console.error(
+    'Veuillez définir un AUTH_TOKEN fort et unique dans votre fichier .env pour la production.'
+  );
   process.exit(1); // Arrêter l'application
 }
