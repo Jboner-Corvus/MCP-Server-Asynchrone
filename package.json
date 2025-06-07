@@ -1,6 +1,6 @@
 {
   "name": "fastmcp-httpstream-docker-refactored",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Refactored FastMCP Server for Docker with HTTP Streaming, Redis Task Queue and improved tooling",
   "main": "dist/server.js",
   "type": "module",
@@ -18,7 +18,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "clean": "rm -rf dist node_modules coverage",
+    "clean": "rm -rf dist node_modules coverage libs",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down -v",
@@ -46,7 +46,7 @@
   "dependencies": {
     "bullmq": "^5.53.0",
     "dotenv": "^16.5.0",
-    "fastmcp": "file:./libs/fastmcp-local",
+    "fastmcp": "2.2.2",
     "pino": "^9.7.0",
     "zod": "^3.25.28"
   },
