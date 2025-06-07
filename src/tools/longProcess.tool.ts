@@ -2,30 +2,14 @@
 
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import { UserError } from 'fastmcp';
+import { UserError, type Context } from 'fastmcp';
 
 import logger from '../logger.js';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
-import { getErrDetails } from '../utils/errorUtils.js';
 import { isValidHttpUrl } from '../utils/validationUtils.js';
 import type { AuthData } from '../types.js';
-const TOOL_NAME = 'asynchronousTaskSimulatorEnhanced';
 
-interface Ctx {
-  session?: AuthData;
-  log?: {
-    info: (message: string, data?: unknown) => void;
-    warn: (message: string, data?: unknown) => void;
-    error: (message: string, data?: unknown) => void;
-    debug: (message: string, data?: unknown) => void;
-  };
-  reportProgress?: (progress: {
-    progress: number;
-    total: number;
-    message?: string;
-  }) => Promise<void>;
-  streamContent?: (content: unknown) => Promise<void>;
-}
+const TOOL_NAME = 'asynchronousTaskSimulatorEnhanced';
 
 export const longProcessParams = z.object({
   durationMs: z.number().int().min(100).max(30000),
@@ -79,12 +63,12 @@ export async function doWorkSpecific(
 
 export const longProcessTool = {
   name: TOOL_NAME,
-  description: "Simulateur de tâche longue asynchrone.",
+  description: 'Simulateur de tâche longue asynchrone.',
   parameters: longProcessParams,
   annotations: { streamingHint: true },
-  execute: async (args: LongProcessParamsType, context: Ctx): Promise<string> => {
-    // CORRECTION : Utiliser context.session pour récupérer les données d'authentification
-    const authData: AuthData | undefined = context.session;
+  execute: async (args: LongProcessParamsType, context: Context<AuthData>): Promise<string> => {
+    // CORRIGÉ : `context.session` contient directement les données d'authentification.
+    const authData = context.session;
     const taskId = randomUUID();
     const toolLogger = context.log;
     const serverLog = logger.child({
@@ -95,7 +79,7 @@ export const longProcessTool = {
     });
 
     serverLog.info({ params: args }, `Requête de tâche asynchrone reçue.`);
-    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, args);
+    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, { args });
 
     if (!authData) {
       throw new UserError("Données d'authentification manquantes.");
@@ -106,9 +90,9 @@ export const longProcessTool = {
     if (args.callbackUrl && !isValidHttpUrl(args.callbackUrl, `${TOOL_NAME}-execute`)) {
       throw new UserError("Format de l'URL de rappel invalide.");
     }
-    if (context.streamContent && context.reportProgress) {
-        // ... (logique de streaming inchangée)
-    }
+
+    // CORRIGÉ: La vérification `if (context.streamContent && ...)` est redondante
+    // car les fonctions sont définies dans le type `Context`. On peut les appeler directement.
 
     const jobId = await enqueueTask<LongProcessParamsType>({
       params: args,

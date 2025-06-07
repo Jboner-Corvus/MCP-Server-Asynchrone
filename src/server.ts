@@ -1,78 +1,88 @@
-// src/server.ts - Aligné sur le design original de FastMCP
+/**
+ * @file src/server.ts
+ * @description Point d'entrée principal du serveur FastMCP.
+ * Ce fichier est responsable de l'initialisation du serveur, de la configuration
+ * de l'authentification, de l'enregistrement des outils, de la gestion des événements
+ * du cycle de vie, et du lancement du transport HTTP.
+ */
 
+// --- Imports des modules Node.js ---
 import { randomUUID } from 'crypto';
 import { IncomingMessage } from 'http';
 
-// Importations directes depuis fastmcp.
+// --- Imports des dépendances ---
 import { FastMCP, UserError } from 'fastmcp';
-import type { FastMCPSession, ServerOptions, Tool, LoggingLevel } from 'fastmcp';
+import type { FastMCPSession, LoggingLevel, Tool } from 'fastmcp';
 
+// --- Imports des modules locaux de l'application ---
 import { config } from './config.js';
 import logger from './logger.js';
-import { debugContextParams, debugContextTool } from './tools/debugContext.tool.js';
-import { longProcessParams, longProcessTool } from './tools/longProcess.tool.js';
-import {
-  synchronousExampleParams,
-  synchronousExampleTool,
-} from './tools/synchronousExample.tool.js';
-import { AppRuntimeSession, AuthData, isAppRuntimeSession } from './types.js';
+import { debugContextTool } from './tools/debugContext.tool.js';
+import { longProcessTool } from './tools/longProcess.tool.js';
+import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
+import { type AuthData } from './types.js';
 import {
   ANSI_COLORS,
-  DEFAULT_PING_OPTIONS,
   DEFAULT_HEALTH_CHECK_OPTIONS,
+  DEFAULT_PING_OPTIONS,
 } from './utils/constants.js';
 import { getErrDetails } from './utils/errorUtils.js';
 
-// Le gestionnaire d'authentification reste spécifique à votre application
+// =============================================================================
+// GESTIONNAIRE D'AUTHENTIFICATION
+// =============================================================================
 const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
-  const authHdr = req.headers?.authorization;
-  const ip =
-    ((req.headers['x-forwarded-for'] as string) || req.socket?.remoteAddress || 'unknown_ip')
-      .split(',')[0]
-      .trim();
-  const authLog = logger.child({ clientIp: ip, method: req.method, url: req.url });
+  const clientIp = (
+    (req.headers['x-forwarded-for'] as string) ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  )
+    .split(',')[0]
+    .trim();
+  const authLog = logger.child({ clientIp, method: req.method, url: req.url, op: 'auth' });
+  const authHeader = req.headers?.authorization;
 
-  if (!authHdr || !authHdr.startsWith('Bearer ')) {
-    authLog.warn("⚠️ Sceau d'Autorisation manquant ou malformé. Accès refusé !");
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    authLog.warn("Tentative d'accès non autorisé : En-tête 'Authorization' manquant ou malformé.");
     throw new Response(JSON.stringify({ error: 'Accès Non Autorisé' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const token = authHdr.substring(7);
+  const token = authHeader.substring(7);
   if (token !== config.AUTH_TOKEN) {
-    authLog.warn('❌ Jeton invalide fourni. Intrusion détectée !');
+    authLog.warn("Tentative d'accès non autorisé : Jeton invalide.");
     throw new Response(JSON.stringify({ error: 'Jeton invalide' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const applicationAuthId = randomUUID();
-  const authData: AuthData = {
-    id: applicationAuthId,
+  const sessionAuthData: AuthData = {
+    id: randomUUID(),
     type: 'Bearer',
     authenticatedAt: Date.now(),
-    clientIp: ip,
+    clientIp,
   };
-  authLog.info({ appAuthId: applicationAuthId }, '✅ Authentification réussie.');
-  return authData;
+
+  authLog.info({ authId: sessionAuthData.id }, 'Authentification réussie.');
+  return sessionAuthData;
 };
 
+// =============================================================================
+// POINT D'ENTRÉE PRINCIPAL DE L'APPLICATION
+// =============================================================================
 async function applicationEntryPoint() {
   logger.info(
-    `🔥 Démarrage du Grimoire du Serveur dans le mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET} de l'Ère Draconique...`
+    `Démarrage du serveur en mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET}...`
   );
 
-  // Création de l'instance FastMCP avec les options, y compris l'authentification
   const server = new FastMCP<AuthData>({
-    name: 'FastMCP-Server-V3-Aligned',
-    version: '3.0.0',
-    authenticate: authHandler, // Le gestionnaire d'authentification est passé ici
-    instructions: `Portail Draconique Asynchrone Aligné.
-Authentification Bearer requise.
-Outils disponibles : ${longProcessTool.name}, ${debugContextTool.name}, ${synchronousExampleTool.name}.`,
+    name: 'MCP-Server-Final',
+    version: '1.1.0',
+    authenticate: authHandler,
+    instructions: `Serveur MCP pour opérations synchrones et asynchrones. Authentification Bearer requise.`,
     health: {
       enabled: DEFAULT_HEALTH_CHECK_OPTIONS.enabled,
       path: config.HEALTH_CHECK_PATH,
@@ -83,30 +93,34 @@ Outils disponibles : ${longProcessTool.name}, ${debugContextTool.name}, ${synchr
       logLevel: DEFAULT_PING_OPTIONS.logLevel as LoggingLevel,
     },
     roots: {
-      enabled: false, // Désactivé pour la simplicité et éviter les erreurs de timeout
+      enabled: true,
     },
   });
 
-  // Ajout des outils directement à l'instance
-  server.addTool(debugContextTool as Tool<AuthData, typeof debugContextParams>);
-  server.addTool(longProcessTool as Tool<AuthData, typeof longProcessParams>);
-  server.addTool(synchronousExampleTool as Tool<AuthData, typeof synchronousExampleParams>);
-  logger.info('✅ Les Outils Anciens sont enregistrés dans le grimoire.');
+  // --- Enregistrement des outils ---
+  server.addTool(debugContextTool);
+  server.addTool(longProcessTool);
+  server.addTool(synchronousExampleTool);
 
-  // Gestion des événements de connexion et de déconnexion
-  server.on('connect', (event) => {
-    // CORRECTION : La propriété `auth` n'est pas publique sur la session.
-    // On logue donc un message générique. L'ID de session sera disponible
-    // dans les logs des appels d'outils spécifiques.
-    logger.info(`🚪 Une nouvelle âme s'est connectée au Nexus.`);
+  const registeredTools = [
+    debugContextTool.name,
+    longProcessTool.name,
+    synchronousExampleTool.name,
+  ];
+  logger.info({ tools: registeredTools }, 'Outils enregistrés avec succès.');
+
+  // --- Gestionnaires d'événements du serveur ---
+  // CORRIGÉ: La propriété `auth` n'existe pas sur l'objet de session global.
+  // Nous loggons un message générique.
+  server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
+    logger.info('Nouvelle connexion client établie.');
   });
 
-  server.on('disconnect', (event) => {
-    // CORRECTION : Idem pour la déconnexion.
-    logger.info(`💔 Une âme a quitté le Nexus.`);
+  server.on('disconnect', (event: { session: FastMCPSession<AuthData>; reason?: string }) => {
+    logger.info({ reason: event.reason }, 'Client déconnecté.');
   });
 
-  // Démarrage du serveur avec le transport HTTP
+  // --- Démarrage du serveur ---
   try {
     await server.start({
       transportType: 'httpStream',
@@ -114,52 +128,53 @@ Outils disponibles : ${longProcessTool.name}, ${debugContextTool.name}, ${synchr
         port: config.PORT,
       },
     });
-    logger.info(
-      `🚀 Gardien FastMCP éveillé. Le portail est ouvert sur le port ${config.PORT}.`
-    );
+    logger.info(`🚀 Serveur FastMCP démarré et à l'écoute sur le port ${config.PORT}`);
   } catch (error) {
-    const errorDetails = getErrDetails(error);
     logger.fatal(
-      { err: errorDetails, startupPhase: 'applicationEntryPoint' },
-      `💀 Échec critique au démarrage du Royaume.`
+      { err: getErrDetails(error), startupPhase: 'server.start' },
+      'Échec critique lors du démarrage du serveur.'
     );
     process.exit(1);
   }
 
-  // Gestionnaires pour un arrêt propre et la robustesse
+  // --- Gestion de l'arrêt propre (Graceful Shutdown) ---
   const shutdown = async (signal: string) => {
-    logger.warn(`🌙 Reçu signal ${signal}. Initiation du Rituel du Crépuscule...`);
+    logger.warn(`Signal ${signal} reçu. Initialisation de l'arrêt propre...`);
     try {
       await server.stop();
-      logger.info("✅ Le Gardien du Serveur FastMCP s'est arrêté.");
+      logger.info('Serveur FastMCP arrêté avec succès.');
     } catch (e: unknown) {
-      logger.error({ err: getErrDetails(e) }, "❌ Erreur lors de l'arrêt du Gardien FastMCP.");
+      logger.error({ err: getErrDetails(e) }, "Erreur lors de l'arrêt du serveur.");
     } finally {
-      logger.info('🌌 Rituel du Crépuscule terminé.');
+      logger.info('Arrêt terminé.');
       process.exit(0);
     }
   };
 
-  ['SIGINT', 'SIGTERM'].forEach((s) => process.on(s, () => shutdown(s)));
-
-  process.on('uncaughtException', (err, origin) => {
-    logger.fatal(
-      { err: getErrDetails(err), origin },
-      `🚨 EXCEPTION NON CAPTURÉE. Forçage du Rituel du Crépuscule !`
-    );
-    process.exit(1);
-  });
-
-  process.on('unhandledRejection', (reason) => {
-    logger.error(
-      { reason: getErrDetails(reason) },
-      '💔 REJET DE PROMESSE NON GÉRÉ.'
-    );
-  });
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
-// Lancement de l'application
+// =============================================================================
+// GESTION DES ERREURS GLOBALES ET LANCEMENT
+// =============================================================================
+process.on('uncaughtException', (err, origin) => {
+  logger.fatal(
+    { err: getErrDetails(err), origin },
+    `EXCEPTION NON CAPTURÉE. Le processus va se terminer.`
+  );
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ reason: getErrDetails(reason) }, 'REJET DE PROMESSE NON GÉRÉ.');
+});
+
+// Lancement du point d'entrée de l'application.
 applicationEntryPoint().catch((err) => {
-  logger.fatal({ err: getErrDetails(err) }, '💀 Erreur fatale non interceptée.');
+  logger.fatal(
+    { err: getErrDetails(err), startupPhase: 'applicationEntryPoint' },
+    "Erreur fatale non interceptée lors de l'initialisation."
+  );
   process.exit(1);
 });

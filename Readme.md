@@ -69,8 +69,7 @@ Suivez ces étapes pour mettre en place votre environnement :
       ./run.sh
       ```
     - **Fichier d'Environnement (`.env`)** :
-      - Si le fichier `.env` est manquant, le script proposera de le créer à partir de `src/.env.example` ou d'un modèle de base.
-      - Vous serez guidé pour configurer la variable cruciale `FASTMCP_SOURCE` (choix entre `local` ou `remote`) dans `.env`.
+      - Si le fichier `.env` est manquant, le script proposera de le créer.
       - ⚠️ **Action Requise** : Éditez manuellement le fichier `.env` pour définir des valeurs **fortes et uniques** pour `AUTH_TOKEN`, `REDIS_PASSWORD`, `WEBHOOK_SECRET`, et toute autre variable sensible ou spécifique à votre déploiement.
         ```dotenv
         # Exemple de variables à personnaliser dans .env
