@@ -3,11 +3,11 @@
   <p><strong>Un serveur modulaire et extensible pour opérations synchrones et asynchrones.</strong></p>
   <p>Propulsé par Docker, BullMQ, Redis et FastMCP.</p>
   <p>
-    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
-    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
-    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-    <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis">
-    <img src="https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="[Image du logo Docker]">
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="[Image du logo Node.js]">
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="[Image du logo TypeScript]">
+    <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="[Image du logo Redis]">
+    <img src="https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="[Image du logo pnpm]">
   </p>
 </div>
 
@@ -19,7 +19,7 @@
 - [📋 Prérequis](#-prérequis)
 - [🚀 Installation & Configuration Initiale](#-installation--configuration-initiale)
 - [⚙️ Exécution et Gestion du Serveur](#️-exécution-et-gestion-du-serveur)
-
+- [🔌 Intégration avec le client N8N](#-intégration-avec-le-client-n8n)
 - [🤝 Contribution](#-contribution)
 
 ---
@@ -41,9 +41,9 @@ Ce document vous guidera à travers l'installation, l'exécution et l'extension 
 
 Avant de commencer, assurez-vous que les éléments suivants sont installés et configurés sur votre système :
 
-- <img src="https://img.shields.io/badge/Docker_Engine- nécessaire-blue?logo=docker" alt="Docker Engine"> : Pour l'exécution des conteneurs.
-- <img src="https://img.shields.io/badge/Docker_Compose (v2+)- nécessaire-blue?logo=docker" alt="Docker Compose"> : Pour l'orchestration des services. Le script `run.sh` vérifiera sa présence.
-- <img src="https://img.shields.io/badge/pnpm-recommandé-orange?logo=pnpm" alt="pnpm"> : (Optionnel, mais recommandé pour le développement local) Pour la gestion des dépendances Node.js et l'exécution des scripts.
+- <img src="https://img.shields.io/badge/Docker_Engine-nécessaire-blue?logo=docker" alt="[Badge Docker Engine]"> : Pour l'exécution des conteneurs.
+- <img src="https://img.shields.io/badge/Docker_Compose_(v2+)-nécessaire-blue?logo=docker" alt="[Badge Docker Compose]"> : Pour l'orchestration des services. Le script `run.sh` vérifiera sa présence.
+- <img src="https://img.shields.io/badge/pnpm-recommandé-orange?logo=pnpm" alt="[Badge pnpm]"> : (Optionnel, mais recommandé pour le développement local) Pour la gestion des dépendances Node.js et l'exécution des scripts.
 
 ---
 
@@ -86,7 +86,7 @@ Suivez ces étapes pour mettre en place votre environnement :
 
 Utilisez le script `run.sh` pour la majorité des opérations de gestion :
 
-- **Installer** : Options `1`,
+- **Installer** : Option `1`,
 - **Visualiser les journaux (logs)** : Option `11`.
 
 ---
