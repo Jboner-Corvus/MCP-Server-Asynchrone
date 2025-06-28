@@ -95,12 +95,10 @@ Utilisez le script `run.sh` pour la majorité des opérations de gestion :
 Le serveur **MCP-Serveur** peut être facilement intégré avec **n8n** pour automatiser vos workflows en exploitant les capacités du **Model Context Protocol (MCP)**. Cette intégration permet d'orchestrer des tâches complexes et de créer des flux d'automatisation sophistiqués.
 
 1. **Ajout du Nœud MCP Client** :
-
    - Dans votre workflow n8n, ajoutez un nœud de type **MCP Client Tool**.
    - Ce nœud servira de pont entre n8n et votre serveur MCP.
 
 2. **Configuration du Point de Terminaison SSE** :
-
    - **Endpoint SSE** : `http://VOTRE_IP:8081/sse`
    - 💡 **Note** : Remplacez `VOTRE_IP` par l'adresse IP réelle de votre serveur MCP (exemple : `192.168.2.16`).
    - Ce point de terminaison utilise les **Server-Sent Events** pour une communication en temps réel.

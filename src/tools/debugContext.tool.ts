@@ -47,17 +47,16 @@ export const debugContextTool = {
       resultMessage += `  Type d'Auth: ${authData.type}\n`;
       resultMessage += `  IP Client: ${authData.clientIp}\n`;
       resultMessage += `  Timestamp: ${new Date(authData.authenticatedAt).toISOString()}\n`;
-      
+
       // CORRECTION: Créer un objet plat et explicitement sérialisable pour le logging
       // afin de satisfaire le type `SerializableValue`.
       const loggableAuthData = {
-          id: authData.id,
-          type: authData.type,
-          authenticatedAt: authData.authenticatedAt,
-          clientIp: authData.clientIp,
+        id: authData.id,
+        type: authData.type,
+        authenticatedAt: authData.authenticatedAt,
+        clientIp: authData.clientIp,
       };
       logFn('Données de session trouvées.', { authData: loggableAuthData });
-
     } else {
       resultMessage += `context.session est INDÉFINI ou NUL.\n`;
       serverLog.warn('context.session est indéfini ou nul.');
