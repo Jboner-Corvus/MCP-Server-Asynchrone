@@ -1,40 +1,59 @@
-# Dockerfile (Version de Débogage pour lister les fichiers)
+# Dockerfile Corrigé
 
-# ÉTAPE 1: BUILDER
+# =================================
+# ÉTAPE 1: BUILDER - Compilation de l'application
+# =================================
 FROM node:24-alpine AS builder
 WORKDIR /app
+
+# Activer pnpm
 RUN corepack enable
+
+# Copier les fichiers de manifeste de paquets
 COPY package.json pnpm-lock.yaml ./
 
-# CORRECTION : Copier le paquet .tgz au lieu du dossier source
-COPY ./fastmcp-*.tgz ./
-
+# Installer TOUTES les dépendances (incl. devDependencies) pour construire le projet
+# pnpm install va maintenant chercher la version publique de fastmcp
 RUN pnpm install --frozen-lockfile
-# ... autres commandes COPY et RUN ...
+
+# Copier le reste du code source de l'application
 COPY . .
 
-# --- ÉTAPE DE DÉBOGAGE ---
-# Liste tous les fichiers pour voir si 'src' est présent
-RUN ls -laR
-
-# Étape qui échoue
+# Compiler le code TypeScript en JavaScript
 RUN pnpm run build
-# ... reste du fichier ...
-# ÉTAPE 2: FINAL
+
+# =================================
+# ÉTAPE 2: FINAL - Création de l'image de production
+# =================================
 FROM node:24-alpine AS final
 WORKDIR /app
+
+# Activer pnpm
 RUN corepack enable
+
+# Définir l'environnement de production
 ENV NODE_ENV=production
+
+# Créer un utilisateur non-root pour des raisons de sécurité
 RUN addgroup -S appgroup && adduser -S -D -G appgroup appuser
 
+# Copier les fichiers de manifeste de paquets
 COPY package.json pnpm-lock.yaml ./
 
-# CORRECTION : Copier le paquet .tgz pour l'installation de production
-COPY ./fastmcp-*.tgz ./
-
+# Installer UNIQUEMENT les dépendances de production
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+
+# Copier les fichiers compilés depuis l'étape de build
 COPY --from=builder /app/dist ./dist
+
+# Donner la propriété du répertoire de l'application à l'utilisateur non-root
 RUN chown -R appuser:appgroup /app
+
+# Changer pour l'utilisateur non-root
 USER appuser
+
+# Exposer le port sur lequel l'application s'exécute
 EXPOSE 8080
-CMD ["pnpm", "run", "start", "--", "--http-stream"]
+
+# La commande pour démarrer le serveur
+CMD ["pnpm", "run", "start"]

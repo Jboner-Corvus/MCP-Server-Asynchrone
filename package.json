@@ -124,10 +124,6 @@
       "!src/worker.ts",
       "!**/node_modules/**"
     ]
-  },
-  "pnpm": {
-    "overrides": {
-      "fastmcp": "file:./fastmcp-1.0.0.tgz"
-    }
+
   }
 }

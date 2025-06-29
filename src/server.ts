@@ -1,4 +1,4 @@
-// src/server.ts (Version Finale Définitive)
+// src/server.ts (Version originale pour la bibliothèque stable)
 
 import { FastMCP } from 'fastmcp';
 import type { IncomingMessage } from 'http';
@@ -11,8 +11,6 @@ import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
 
-// Cette fonction est appelée pour chaque nouvelle connexion et garantit
-// qu'une session (authentifiée ou invitée) est toujours créée.
 const authenticate = async (request: IncomingMessage): Promise<SessionData> => {
   const clientIp = String(
     request.headers['x-forwarded-for'] || request.socket.remoteAddress || 'unknown'
