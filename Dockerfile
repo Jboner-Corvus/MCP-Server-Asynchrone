@@ -1,5 +1,5 @@
 # ÉTAPE 1: BUILDER - Compilation de l'application
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Activer pnpm via corepack
@@ -16,7 +16,7 @@ COPY . .
 RUN pnpm run build
 
 # ÉTAPE 2: FINAL - Image d'exécution optimisée
-FROM node:22-alpine AS final
+FROM node:24-alpine AS final
 WORKDIR /app
 
 # Activer pnpm
@@ -29,8 +29,7 @@ RUN addgroup -S appgroup && adduser -S -D -G appgroup appuser
 
 # Installer uniquement les dépendances de PRODUCTION
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
-
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 # Copier le code compilé depuis l'étape 'builder'
 COPY --from=builder /app/dist ./dist
 
@@ -44,4 +43,4 @@ USER appuser
 EXPOSE 8080
 
 # Commande par défaut pour démarrer le serveur principal
-CMD ["pnpm", "run", "start:server"]
+CMD ["pnpm", "run", "start", "--", "--http-stream"]

@@ -2,7 +2,7 @@
   /**
    * Hérite des options recommandées pour Node.js 22, assurant une base moderne et standardisée.
    */
-  "extends": "@tsconfig/node22/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
 
   "compilerOptions": {
     /**
