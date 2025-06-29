@@ -1,13 +1,12 @@
-// src/tools/longProcess.tool.ts
+// src/tools/longProcess.tool.ts (Corrigé)
 
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { UserError, type Context } from 'fastmcp';
-
 import logger from '../logger.js';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
 import { isValidHttpUrl } from '../utils/validationUtils.js';
-import type { AuthData } from '../types.js';
+import type { SessionData } from '../types.js';
 
 const TOOL_NAME = 'asynchronousTaskSimulatorEnhanced';
 
@@ -31,56 +30,54 @@ export type LongProcessResultType = {
   inputUserId?: string;
 };
 
+// CORRECTION : Ajout d'une implémentation pour la fonction.
+// Cela corrige les erreurs de "paramètre non utilisé" et de "valeur de retour manquante".
 export async function doWorkSpecific(
   params: LongProcessParamsType,
-  auth: AuthData | undefined,
+  auth: SessionData | undefined,
   taskId: string
 ): Promise<LongProcessResultType> {
-  const log = logger.child({
-    tool: TOOL_NAME,
-    taskId,
-    proc: 'worker-logic',
-    appAuthId: auth?.id,
-  });
-  log.info({ params }, `Début du traitement de la tâche longue.`);
   const startTime = new Date();
-  await new Promise((res) => setTimeout(res, params.durationMs));
+  logger.info({ taskId, authId: auth?.id }, `Début du travail pour la tâche ${taskId}`);
+
   if (params.failTask) {
-    throw new Error(`Échec simulé pour la tâche ${taskId}.`);
+    throw new Error('Échec simulé dans le worker.');
   }
-  const result = params.value1 + params.value2;
+
+  await new Promise(resolve => setTimeout(resolve, params.durationMs));
+
   const endTime = new Date();
-  const durationTakenMs = endTime.getTime() - startTime.getTime();
-  return {
-    calcRes: result,
-    details: `Le résultat de ${params.value1} + ${params.value2} est calculé.`,
+  const result: LongProcessResultType = {
+    calcRes: params.value1 + params.value2,
+    details: 'Calcul terminé avec succès.',
     startTime: startTime.toISOString(),
     endTime: endTime.toISOString(),
-    durationTakenMs,
+    durationTakenMs: endTime.getTime() - startTime.getTime(),
     inputUserId: params.userId,
   };
+  
+  logger.info({ taskId }, `Travail terminé pour la tâche ${taskId}`);
+  return result;
 }
 
 export const longProcessTool = {
   name: TOOL_NAME,
-  description: 'Simulateur de tâche longue asynchrone.',
+  description: 'Simulateur de tâche longue asynchrone qui peut streamer sa progression.',
   parameters: longProcessParams,
   annotations: { streamingHint: true },
-  execute: async (args: LongProcessParamsType, context: Context<AuthData>): Promise<string> => {
-    // CORRIGÉ : `context.session` contient directement les données d'authentification.
+  execute: async (args: LongProcessParamsType, context: Context<SessionData>): Promise<string> => {
     const authData = context.session;
     const taskId = randomUUID();
     const toolLogger = context.log;
+
     const serverLog = logger.child({
       clientIp: authData?.clientIp,
       appAuthId: authData?.id,
       tool: TOOL_NAME,
       taskId,
     });
-
     serverLog.info({ params: args }, `Requête de tâche asynchrone reçue.`);
-    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, { args });
-
+    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`);
     if (!authData) {
       throw new UserError("Données d'authentification manquantes.");
     }
@@ -90,9 +87,13 @@ export const longProcessTool = {
     if (args.callbackUrl && !isValidHttpUrl(args.callbackUrl, `${TOOL_NAME}-execute`)) {
       throw new UserError("Format de l'URL de rappel invalide.");
     }
-
-    // CORRIGÉ: La vérification `if (context.streamContent && ...)` est redondante
-    // car les fonctions sont définies dans le type `Context`. On peut les appeler directement.
+    
+    // CORRECTION : Le type de contenu a été changé en 'text' pour être valide.
+    // L'information a été placée dans la propriété 'text'.
+    context.streamContent?.({
+      type: 'text',
+      text: `[task_started] La tâche a été acceptée (ID: ${taskId}) et mise en file d'attente.`,
+    });
 
     const jobId = await enqueueTask<LongProcessParamsType>({
       params: args,
@@ -101,11 +102,12 @@ export const longProcessTool = {
       toolName: TOOL_NAME,
       cbUrl: args.callbackUrl,
     });
-
+    
     let response = `Tâche "${TOOL_NAME}" (ID: ${jobId || taskId}) mise en file d'attente.`;
     if (args.callbackUrl) {
       response += ` Une notification sera envoyée à ${args.callbackUrl}.`;
     }
+
     return response;
   },
 };

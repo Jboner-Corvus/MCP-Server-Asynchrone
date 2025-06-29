@@ -1,9 +1,10 @@
-// src/utils/asyncToolHelper.ts
+// src/utils/asyncToolHelper.ts (Corrigé)
 import logger from '../logger.js';
-import { taskQueue, AsyncTaskJobPayload } from '../queue.js';
+// CORRECTION : 'AsyncTaskJobPayload' a été renommé en 'AsyncTaskPayload' pour correspondre à l'exportation de queue.ts.
+import { taskQueue, AsyncTaskPayload } from '../queue.js';
 import { EnqueueTaskError, getErrDetails, ErrorDetails } from './errorUtils.js';
-
-import type { AuthData } from '../types.js';
+// CORRECTION : Importation de 'SessionData' et création d'un alias 'AuthData' pour correspondre à l'usage.
+import type { SessionData as AuthData } from '../types.js';
 
 export interface EnqueueParams<TParams> {
   params: TParams;
@@ -16,9 +17,9 @@ export interface EnqueueParams<TParams> {
 export interface TaskOutcome<TParams, TResult> {
   taskId: string;
   status: 'completed' | 'error' | 'processing';
-  msg: string; // This is a general message for the outcome, distinct from error.message
+  msg: string;
   result?: TResult;
-  error?: ErrorDetails; // Uses ErrorDetails, which expects 'message'
+  error?: ErrorDetails;
   inParams: TParams;
   ts: string;
   progress?: { current: number; total: number; unit?: string };
@@ -38,7 +39,8 @@ export async function enqueueTask<TParams>(
     proc: 'task-producer',
     cbUrl: !!cbUrl,
   });
-  const jobData: AsyncTaskJobPayload<TParams> = { params, auth, taskId, toolName, cbUrl };
+  // CORRECTION : Le type de jobData a été mis à jour vers 'AsyncTaskPayload'.
+  const jobData: AsyncTaskPayload<TParams> = { params, auth, taskId, toolName, cbUrl };
   try {
     const job = await taskQueue.add(toolName, jobData, { jobId: taskId });
     log.info({ jobId: job.id, queue: taskQueue.name }, `Tâche ajoutée à la file d'attente.`);
@@ -50,7 +52,7 @@ export async function enqueueTask<TParams>(
       "Échec de l'ajout de la tâche à la file d'attente."
     );
     throw new EnqueueTaskError(
-      `L'ajout de la tâche ${taskId} pour ${toolName} à la file d'attente a échoué : ${errDetails.message}`, // Use errDetails.message
+      `L'ajout de la tâche ${taskId} pour ${toolName} à la file d'attente a échoué : ${errDetails.message}`,
       { originalError: errDetails, toolName, taskId }
     );
   }

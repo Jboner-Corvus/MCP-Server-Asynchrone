@@ -1,8 +1,9 @@
-// src/queue.ts
-import { Queue, ConnectionOptions } from "bullmq";
-import { config } from "./config.js";
-import logger from "./logger.js";
-import type { SessionData } from "./types.js";
+// src/queue.ts (Corrigé)
+
+import { Queue, ConnectionOptions } from 'bullmq';
+import { config } from './config.js';
+import logger from './logger.js';
+import type { SessionData } from './types.js';
 
 export const TASK_QUEUE_NAME = 'async-tasks';
 
@@ -13,23 +14,26 @@ export const redisConnection: ConnectionOptions = {
   maxRetriesPerRequest: null,
 };
 
-// Renommé en 'AsyncTaskPayload' pour être cohérent.
+// CORRECTION : Ajout des propriétés 'toolName' et 'cbUrl' pour correspondre
+// à l'objet 'jobData' créé dans 'asyncToolHelper.ts'.
 export interface AsyncTaskPayload<TParams = unknown> {
   params: TParams;
-  auth: SessionData;
+  auth: SessionData | undefined;
   taskId: string;
+  toolName: string;
+  cbUrl?: string;
 }
 
 export const taskQueue = new Queue<AsyncTaskPayload>(TASK_QUEUE_NAME, {
   connection: redisConnection,
   defaultJobOptions: {
     attempts: 3,
-    backoff: { type: "exponential", delay: 5000 },
+    backoff: { type: 'exponential', delay: 5000 },
   },
 });
 
-taskQueue.on("error", (err) => logger.error({ err }, "Erreur de la file d'attente BullMQ"));
+taskQueue.on('error', (err) => logger.error({ err }, "Erreur de la file d'attente BullMQ"));
 
 logger.info(
-    `File d'attente '${TASK_QUEUE_NAME}' initialisée pour ${config.REDIS_HOST}:${config.REDIS_PORT}`
+  `File d'attente '${TASK_QUEUE_NAME}' initialisée pour ${config.REDIS_HOST}:${config.REDIS_PORT}`
 );

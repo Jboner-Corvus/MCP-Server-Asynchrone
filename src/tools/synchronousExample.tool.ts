@@ -1,12 +1,14 @@
-// src/tools/synchronousExample.tool.ts
+// src/tools/synchronousExample.tool.ts (Corrigé)
 
 import { z as zod } from 'zod';
 import type { Context, SerializableValue, TextContent } from 'fastmcp';
 import loggerInstance from '../logger.js';
-import type { AuthData as AuthDataType } from '../types.js';
+// CORRECTION : Importation de 'SessionData' avec l'alias 'AuthDataType' pour correspondre à l'usage.
+import type { SessionData as AuthDataType } from '../types.js';
 
 const SYNC_TOOL_NAME = 'synchronousExampleToolEnhanced';
 
+// ... le reste du fichier est inchangé ...
 export const synchronousExampleParams = zod.object({
   data: zod.string().min(1).describe('La donnée à transmuter.'),
   delayMs: zod.number().int().min(0).max(1000).optional().default(10),

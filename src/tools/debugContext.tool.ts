@@ -1,9 +1,9 @@
-// src/tools/debugContext.tool.ts
+// src/tools/debugContext.tool.ts (Corrigé)
 
 import { z } from 'zod';
 import type { Context, SerializableValue } from 'fastmcp';
 import logger from '../logger.js';
-import { type AuthData } from '../types.js';
+import type { SessionData as AuthData } from '../types.js';
 
 const TOOL_NAME = 'correctDebugContextTool';
 
@@ -12,7 +12,6 @@ export const debugContextParams = z.object({
   useClientLogger: z.boolean().optional().default(false),
   userId: z.string().optional(),
 });
-
 export type ParamsType = z.infer<typeof debugContextParams>;
 
 export const debugContextTool = {
@@ -28,7 +27,6 @@ export const debugContextTool = {
       clientIp: authData?.clientIp,
       appAuthId: authData?.id,
     });
-
     const logFn = (message: string, data?: Record<string, SerializableValue>) => {
       if (args.useClientLogger && clientLog) {
         clientLog.info(message, data);
@@ -36,23 +34,22 @@ export const debugContextTool = {
         serverLog.info(data, message);
       }
     };
-
     let resultMessage = `Rapport de l'Outil de Débogage de Contexte:\n`;
     resultMessage += `UserID (n8n, depuis argument): ${args.userId || 'Non Fourni'}\n`;
-
     resultMessage += `\n--- Données d'Authentification (context.session) ---\n`;
     if (authData) {
       resultMessage += `Objet context.session présent.\n`;
       resultMessage += `  ID Applicatif: ${authData.id}\n`;
+      // La propriété 'type' vient de la signature d'index et peut être 'unknown'
       resultMessage += `  Type d'Auth: ${authData.type}\n`;
       resultMessage += `  IP Client: ${authData.clientIp}\n`;
       resultMessage += `  Timestamp: ${new Date(authData.authenticatedAt).toISOString()}\n`;
-
-      // CORRECTION: Créer un objet plat et explicitement sérialisable pour le logging
-      // afin de satisfaire le type `SerializableValue`.
+      
+      // CORRECTION : Assurer que toutes les valeurs sont sérialisables.
+      // La propriété 'type' est de type 'unknown', nous la convertissons en chaîne.
       const loggableAuthData = {
         id: authData.id,
-        type: authData.type,
+        type: String(authData.type ?? 'unknown'), // Conversion sûre en chaîne
         authenticatedAt: authData.authenticatedAt,
         clientIp: authData.clientIp,
       };

@@ -9,33 +9,27 @@
     "dev": "concurrently \"npm:dev:server\" \"npm:dev:worker\"",
     "dev:server": "tsx watch src/server.ts",
     "dev:worker": "tsx watch src/worker.ts",
-
     "//--- BUILD ---": "",
     "build": "npm run clean && tsc",
     "clean": "rimraf dist",
-
     "//--- PRODUCTION ---": "",
     "start": "node dist/server.js",
     "start:worker": "node dist/worker.js",
-
     "//--- QUALITÉ & LINTING ---": "",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-types": "tsc --noEmit",
-
     "//--- TESTS ---": "",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "npm run test -- --watchAll",
     "test:coverage": "npm run test -- --coverage",
-    
     "//--- DOCKER ---": "",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down -v",
     "docker:logs": "docker compose logs -f",
-
     "//--- GIT HOOKS ---": "",
     "prepare": "husky"
   },
