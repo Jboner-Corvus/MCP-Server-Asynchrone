@@ -1,29 +1,26 @@
 services:
-  # NGINX : Notre nouveau point d'entrée qui gère le CORS.
+  # NGINX : Point d'entrée qui gère les requêtes externes.
   nginx:
     image: nginx:1.27-alpine
     container_name: fastmcp_nginx
     ports:
-      # Seul Nginx expose le port 8080 à l'extérieur.
       - "${HOST_PORT:-8080}:8080"
     volumes:
-      # On lie notre configuration Nginx.
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      # La configuration Nginx est requise (voir ci-dessous)
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - fastmcp-server
     restart: unless-stopped
     networks:
       - app_net
 
-  # SERVEUR FastMCP : N'est plus exposé directement.
+  # SERVEUR FastMCP : Ne gère que les requêtes directes.
   fastmcp-server:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: fastmcp_server_app
-    # Le port n'est plus publié ici, Nginx gère l'accès.
-    env_file:
-      - .env
+    env_file: .env
     environment:
       - NODE_ENV=production
       - REDIS_HOST=redis
@@ -35,15 +32,15 @@ services:
     networks:
       - app_net
 
-  # WORKER : Inchangé.
+  # WORKER : Gère les tâches asynchrones en arrière-plan.
   worker:
     build:
       context: .
       dockerfile: Dockerfile
+    # La commande pour démarrer spécifiquement le worker
     command: pnpm run start:worker
     container_name: fastmcp_worker
-    env_file:
-      - .env
+    env_file: .env
     environment:
       - NODE_ENV=production
       - REDIS_HOST=redis
@@ -55,7 +52,7 @@ services:
     networks:
       - app_net
 
-  # REDIS : Inchangé.
+  # REDIS : File d'attente pour BullMQ.
   redis:
     image: redis:7.2-alpine
     container_name: fastmcp_redis

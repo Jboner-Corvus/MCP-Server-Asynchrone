@@ -5,26 +5,38 @@
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run start:server",
-    "start:server": "node dist/server.js",
+    "//--- DEVELOPPEMENT ---": "",
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:worker\"",
+    "dev:server": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+
+    "//--- BUILD ---": "",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf dist",
+
+    "//--- PRODUCTION ---": "",
+    "start": "node dist/server.js",
     "start:worker": "node dist/worker.js",
-    "dev": "npm run dev:server & npm run dev:worker",
-    "dev:server": "NODE_ENV=development ts-node --esm src/server.ts",
-    "dev:worker": "NODE_ENV=development ts-node --esm src/worker.ts",
+
+    "//--- QUALITÉ & LINTING ---": "",
     "lint": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.ts\" \"*.json\" \"*.md\"",
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "check-types": "tsc --noEmit",
+
+    "//--- TESTS ---": "",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "clean": "rm -rf dist node_modules coverage libs",
+    "test:watch": "npm run test -- --watchAll",
+    "test:coverage": "npm run test -- --coverage",
+    
+    "//--- DOCKER ---": "",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down -v",
     "docker:logs": "docker compose logs -f",
-    "docker:logs:app": "docker compose logs -f fastmcp-server",
-    "docker:logs:worker": "docker compose logs -f worker",
+
+    "//--- GIT HOOKS ---": "",
     "prepare": "husky"
   },
   "keywords": [
@@ -37,12 +49,13 @@
     "node",
     "redis",
     "bullmq",
-    "worker",
-    "api",
-    "html"
+    "worker"
   ],
   "author": "Your Name/Team <your.email@example.com>",
   "license": "ISC",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "bullmq": "^5.53.0",
     "dotenv": "^16.5.0",
@@ -52,13 +65,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.21",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
+    "concurrently": "^8.2.2",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-import-resolver-typescript": "^4.4.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.4.0",
     "globals": "^15.15.0",
@@ -67,14 +81,10 @@
     "lint-staged": "^16.0.0",
     "pino-pretty": "^13.0.0",
     "prettier": "^3.5.3",
+    "rimraf": "^5.0.7",
     "ts-jest": "^29.3.4",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.15.7",
     "typescript": "^5.8.3"
-  },
-  "engines": {
-    "node": ">=24.0.2",
-    "npm": ">=11.3.0"
   },
   "lint-staged": {
     "*.{ts,js}": [
@@ -105,8 +115,7 @@
       ]
     },
     "extensionsToTreatAsEsm": [
-      ".ts",
-      ".tsx"
+      ".ts"
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1",
@@ -114,21 +123,11 @@
     },
     "collectCoverageFrom": [
       "src/**/*.ts",
+      "!src/**/*.d.ts",
       "!src/types.ts",
       "!src/server.ts",
       "!src/worker.ts",
-      "!src/config.ts",
-      "!src/logger.ts",
-      "!src/queue.ts",
-      "!src/**/index.ts",
-      "!src/**/constants.ts"
+      "!**/node_modules/**"
     ]
-  },
-  "homepage": "YOUR_PROJECT_HOMEPAGE_HERE",
-  "pnpm": {
-    "overrides": {
-      "glob": "^10.4.2",
-      "inflight": "npm:semver@latest"
-    }
   }
 }

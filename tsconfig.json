@@ -1,50 +1,68 @@
 {
+  /**
+   * Hérite des options recommandées pour Node.js 22, assurant une base moderne et standardisée.
+   */
+  "extends": "@tsconfig/node22/tsconfig.json",
+
   "compilerOptions": {
-    /* Basic Options */
-    "target": "ES2022",
+    /**
+     * Options de base pour la compatibilité et la modularité.
+     * Le trio "NodeNext" est la configuration moderne pour les projets ESM sur Node.js.
+     */
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "target": "ES2022",
+
+    /**
+     * Qualité et Striction du Code.
+     * Ces options garantissent un code plus sûr et plus propre.
+     */
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true, // Important si fastmcp-local est traité comme une dépendance externe
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
 
-    /* Output Options pour MCP++ */
-    "outDir": "./dist", // CORRIGÉ: Le répertoire de sortie est maintenant ./dist
+    /**
+     * Interopérabilité et configuration du build.
+     */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+
+    /**
+     * Configuration des chemins de sortie et des sources.
+     * Essentiel pour que `tsc` sache où trouver les sources et où placer les fichiers compilés.
+     */
+    "rootDir": "./src",
+    "outDir": "./dist",
     "declaration": true,
     "sourceMap": true,
 
-    /* Root Directory pour MCP++ */
-    "rootDir": "./src", // Seules les sources de MCP++ sont compilées par ce tsconfig
-
-    /* Path Mapping (peut ne plus être nécessaire ou pointer vers les types compilés) */
+    /**
+     * Configuration des chemins d'alias.
+     * Permet d'utiliser des imports comme `import ... from '@/utils/helpers'`
+     * au lieu de `import ... from '../../utils/helpers'`.
+     */
     "baseUrl": ".",
-    // Les "paths" pour "fastmcp" pourraient ne plus être nécessaires si
-    // TypeScript peut résoudre "fastmcp" via node_modules (grâce au lien symlink "file:")
-    // et si le package.json de "fastmcp-local" a un champ "types" correct.
-    // Si vous les conservez, ils devraient idéalement pointer vers les .d.ts compilés.
-    // Exemple si les types compilés sont dans libs/fastmcp-local/dist :
-    // "paths": {
-    //   "fastmcp": ["libs/fastmcp-local/dist/index.d.ts"],
-    //   "fastmcp/*": ["libs/fastmcp-local/dist/*"]
-    // },
-    // Pour l'instant, nous les enlevons, en supposant une résolution standard de module.
+    "paths": {
+      "@/*": ["./src/*"]
+    },
 
-    /* Other common options */
-    "resolveJsonModule": true,
-    "allowJs": false,
-    "isolatedModules": true
-    // "noEmit": false // Pour un build réel.
+    /**
+     * Permet d'importer des fichiers JSON directement dans le code TypeScript.
+     */
+    "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*" // N'inclut que les fichiers sources de l'application MCP++
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "libs", // Exclure explicitement le répertoire libs des sources à compiler par CE tsconfig
-    "**/*.test.ts",
-    "**/__tests__/*",
-    "coverage/"
-  ]
+
+  /**
+   * Spécifie les fichiers à inclure dans la compilation.
+   * Ici, nous incluons tout le code source dans le répertoire `src`.
+   */
+  "include": ["src/**/*"],
+
+  /**
+   * Spécifie les fichiers à exclure de la compilation.
+   * Essentiel pour ne pas compiler les dépendances, les fichiers de test ou les builds précédents.
+   */
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
