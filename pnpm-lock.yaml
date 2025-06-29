@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fastmcp: file:fastmcp-1.0.0.tgz
+
 importers:
   .:
     dependencies:
@@ -14,8 +17,8 @@ importers:
         specifier: ^16.5.0
         version: 16.6.1
       fastmcp:
-        specifier: 3.6.2
-        version: 3.6.2
+        specifier: file:fastmcp-1.0.0.tgz
+        version: file:fastmcp-1.0.0.tgz
       pino:
         specifier: ^9.7.0
         version: 9.7.0
@@ -367,86 +370,6 @@ packages:
       {
         integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==,
       }
-
-  '@biomejs/biome@2.0.6':
-    resolution:
-      {
-        integrity: sha512-RRP+9cdh5qwe2t0gORwXaa27oTOiQRQvrFf49x2PA1tnpsyU7FIHX4ZOFMtBC4QNtyWsN7Dqkf5EDbg4X+9iqA==,
-      }
-    engines: { node: '>=14.21.3' }
-    hasBin: true
-
-  '@biomejs/cli-darwin-arm64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-AzdiNNjNzsE6LfqWyBvcL29uWoIuZUkndu+wwlXW13EKcBHbbKjNQEZIJKYDc6IL+p7bmWGx3v9ZtcRyIoIz5A==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [arm64]
-    os: [darwin]
-
-  '@biomejs/cli-darwin-x64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-wJjjP4E7bO4WJmiQaLnsdXMa516dbtC6542qeRkyJg0MqMXP0fvs4gdsHhZ7p9XWTAmGIjZHFKXdsjBvKGIJJQ==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [x64]
-    os: [darwin]
-
-  '@biomejs/cli-linux-arm64-musl@2.0.6':
-    resolution:
-      {
-        integrity: sha512-CVPEMlin3bW49sBqLBg2x016Pws7eUXA27XYDFlEtponD0luYjg2zQaMJ2nOqlkKG9fqzzkamdYxHdMDc2gZFw==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [arm64]
-    os: [linux]
-
-  '@biomejs/cli-linux-arm64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-ZSVf6TYo5rNMUHIW1tww+rs/krol7U5A1Is/yzWyHVZguuB0lBnIodqyFuwCNqG9aJGyk7xIMS8HG0qGUPz0SA==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [arm64]
-    os: [linux]
-
-  '@biomejs/cli-linux-x64-musl@2.0.6':
-    resolution:
-      {
-        integrity: sha512-mKHE/e954hR/hSnAcJSjkf4xGqZc/53Kh39HVW1EgO5iFi0JutTN07TSjEMg616julRtfSNJi0KNyxvc30Y4rQ==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [x64]
-    os: [linux]
-
-  '@biomejs/cli-linux-x64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-geM1MkHTV1Kh2Cs/Xzot9BOF3WBacihw6bkEmxkz4nSga8B9/hWy5BDiOG3gHDGIBa8WxT0nzsJs2f/hPqQIQw==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [x64]
-    os: [linux]
-
-  '@biomejs/cli-win32-arm64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-290V4oSFoKaprKE1zkYVsDfAdn0An5DowZ+GIABgjoq1ndhvNxkJcpxPsiYtT7slbVe3xmlT0ncdfOsN7KruzA==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [arm64]
-    os: [win32]
-
-  '@biomejs/cli-win32-x64@2.0.6':
-    resolution:
-      {
-        integrity: sha512-bfM1Bce0d69Ao7pjTjUS+AWSZ02+5UHdiAP85Th8e9yV5xzw6JrHXbL5YWlcEKQ84FIZMdDc7ncuti1wd2sdbw==,
-      }
-    engines: { node: '>=14.21.3' }
-    cpu: [x64]
-    os: [win32]
 
   '@emnapi/core@1.4.3':
     resolution:
@@ -2592,11 +2515,13 @@ packages:
         integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==,
       }
 
-  fastmcp@3.6.2:
+  fastmcp@file:fastmcp-1.0.0.tgz:
     resolution:
       {
-        integrity: sha512-Yb8FNay+NpWNtfOQSLaEmcmSIxhhOv9YWy4WB1WNC6xhBhDIyPmDQx1dMTnU3zvPEnXN1TDxgbXCW06l4VMWjg==,
+        integrity: sha512-xOO6NBRiQwXAkJigwqP9OntDi3LgbH58AA58S+7umavl0pRnWD5v4s+DjCAXFvJrDxHpCYn7aX2SHHKceXKUhg==,
+        tarball: file:fastmcp-1.0.0.tgz,
       }
+    version: 1.0.0
     hasBin: true
 
   fastq@1.19.1:
@@ -5020,10 +4945,10 @@ packages:
       }
     engines: { node: '>=0.6' }
 
-  token-types@6.0.1:
+  token-types@6.0.3:
     resolution:
       {
-        integrity: sha512-jK12SoPQ9D33HTOIQaOhc5tN4Vr+hlbiP/GSPviCyo8/7xgPG5j4AYvl7Zd4k8RhL55eT/IUhBGl7fL06w3mrQ==,
+        integrity: sha512-IKJ6EzuPPWtKtEIEPpIdXv9j5j2LGJEYk0CKY2efgKoYKLBiZdh6iQkLVBow/CB3phyWAWCyk+bZeaimJn6uRQ==,
       }
     engines: { node: '>=14.16' }
 
@@ -5634,41 +5559,6 @@ snapshots:
 
   '@bcoe/v8-coverage@0.2.3': {}
 
-  '@biomejs/biome@2.0.6':
-    optionalDependencies:
-      '@biomejs/cli-darwin-arm64': 2.0.6
-      '@biomejs/cli-darwin-x64': 2.0.6
-      '@biomejs/cli-linux-arm64': 2.0.6
-      '@biomejs/cli-linux-arm64-musl': 2.0.6
-      '@biomejs/cli-linux-x64': 2.0.6
-      '@biomejs/cli-linux-x64-musl': 2.0.6
-      '@biomejs/cli-win32-arm64': 2.0.6
-      '@biomejs/cli-win32-x64': 2.0.6
-
-  '@biomejs/cli-darwin-arm64@2.0.6':
-    optional: true
-
-  '@biomejs/cli-darwin-x64@2.0.6':
-    optional: true
-
-  '@biomejs/cli-linux-arm64-musl@2.0.6':
-    optional: true
-
-  '@biomejs/cli-linux-arm64@2.0.6':
-    optional: true
-
-  '@biomejs/cli-linux-x64-musl@2.0.6':
-    optional: true
-
-  '@biomejs/cli-linux-x64@2.0.6':
-    optional: true
-
-  '@biomejs/cli-win32-arm64@2.0.6':
-    optional: true
-
-  '@biomejs/cli-win32-x64@2.0.6':
-    optional: true
-
   '@emnapi/core@1.4.3':
     dependencies:
       '@emnapi/wasi-threads': 1.0.2
@@ -6101,7 +5991,7 @@ snapshots:
     dependencies:
       debug: 4.4.1
       fflate: 0.8.2
-      token-types: 6.0.1
+      token-types: 6.0.3
     transitivePeerDependencies:
       - supports-color
 
@@ -7160,7 +7050,7 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fastmcp@3.6.2:
+  fastmcp@file:fastmcp-1.0.0.tgz:
     dependencies:
       '@modelcontextprotocol/sdk': 1.13.2
       '@standard-schema/spec': 1.0.0
@@ -7208,7 +7098,7 @@ snapshots:
     dependencies:
       '@tokenizer/inflate': 0.2.7
       strtok3: 10.3.1
-      token-types: 6.0.1
+      token-types: 6.0.3
       uint8array-extras: 1.4.0
     transitivePeerDependencies:
       - supports-color
@@ -8757,9 +8647,8 @@ snapshots:
 
   toidentifier@1.0.1: {}
 
-  token-types@6.0.1:
+  token-types@6.0.3:
     dependencies:
-      '@biomejs/biome': 2.0.6
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
 
