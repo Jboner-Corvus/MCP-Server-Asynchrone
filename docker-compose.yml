@@ -1,28 +1,14 @@
-# docker-compose.yml (Version finale et structurée)
+# docker-compose.yml (Version Finale sans Nginx)
 services:
-  nginx:
-    image: nginx:1.27-alpine
-    container_name: fastmcp_nginx
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - fastmcp-server
-    restart: unless-stopped
-    networks:
-      - app_net
-
   fastmcp-server:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: fastmcp_server_app
+    ports:
+      # Expose le port 8080 du conteneur directement sur le port 8080 de votre machine hôte.
+      - '8080:8080'
     env_file: .env
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -37,10 +23,6 @@ services:
     command: pnpm run start:worker
     container_name: fastmcp_worker
     env_file: .env
-    environment:
-      - NODE_ENV=production
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -68,4 +50,3 @@ volumes:
 
 networks:
   app_net:
-    driver: bridge

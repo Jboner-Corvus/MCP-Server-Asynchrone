@@ -14,9 +14,13 @@ import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
 // Cette fonction est appelée pour chaque nouvelle connexion et garantit
 // qu'une session (authentifiée ou invitée) est toujours créée.
 const authenticate = async (request: IncomingMessage): Promise<SessionData> => {
-  const clientIp = String(request.headers['x-forwarded-for'] || request.socket.remoteAddress || 'unknown');
+  const clientIp = String(
+    request.headers['x-forwarded-for'] || request.socket.remoteAddress || 'unknown'
+  );
   const authorizationHeader = request.headers.authorization;
-  const token = authorizationHeader?.startsWith('Bearer ') ? authorizationHeader.substring(7) : null;
+  const token = authorizationHeader?.startsWith('Bearer ')
+    ? authorizationHeader.substring(7)
+    : null;
 
   if (token && token === config.AUTH_TOKEN) {
     logger.info({ clientIp }, 'Authentication successful, creating authenticated session.');
@@ -34,7 +38,7 @@ const authenticate = async (request: IncomingMessage): Promise<SessionData> => {
   } else {
     logger.info({ clientIp }, 'No token provided, creating guest session.');
   }
-  
+
   return {
     id: randomUUID(),
     clientIp,
