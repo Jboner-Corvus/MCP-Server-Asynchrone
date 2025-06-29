@@ -124,6 +124,5 @@
       "!src/worker.ts",
       "!**/node_modules/**"
     ]
-
   }
 }

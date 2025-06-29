@@ -1,13 +1,14 @@
-# docker-compose.yml (Version Finale sans Nginx)
+# docker-compose.yml (Version Corrigée avec Nginx)
 services:
   fastmcp-server:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: fastmcp_server_app
-    ports:
-      # Expose le port 8080 du conteneur directement sur le port 8080 de votre machine hôte.
-      - '8080:8080'
+    # On ne publie PLUS le port de l'application directement sur l'hôte.
+    # Seul Nginx sera accessible de l'extérieur.
+    # ports:
+    #  - '8080:8080' # Ligne à supprimer ou commenter
     env_file: .env
     depends_on:
       redis:
@@ -42,6 +43,23 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - app_net
+
+  # ==========================================================
+  # AJOUT : Le service Nginx comme reverse proxy
+  # ==========================================================
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: fastmcp_nginx
+    ports:
+      # Nginx écoute sur le port 8080 de l'hôte et le redirige vers le port 80 du conteneur Nginx.
+      - '8080:80'
+    volumes:
+      # On monte le fichier de configuration Nginx dans le conteneur.
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - fastmcp-server
     networks:
       - app_net
 
