@@ -44,7 +44,7 @@ export const debugContextTool = {
       resultMessage += `  Type d'Auth: ${authData.type}\n`;
       resultMessage += `  IP Client: ${authData.clientIp}\n`;
       resultMessage += `  Timestamp: ${new Date(authData.authenticatedAt).toISOString()}\n`;
-      
+
       // CORRECTION : Assurer que toutes les valeurs sont sérialisables.
       // La propriété 'type' est de type 'unknown', nous la convertissons en chaîne.
       const loggableAuthData = {

@@ -1,5 +1,7 @@
-// src/utils/errorUtils.test.ts
-import { getErrDetails, AppErrorBase } from './errorUtils'; // Adjust path as needed
+// src/utils/errorUtils.test.ts (Corrigé)
+
+// CORRECTION : Ajout de l'extension '.js' pour se conformer à la règle de linting et à la résolution de module NodeNext.
+import { getErrDetails, AppErrorBase } from './errorUtils.js';
 
 describe('ErrorUtils', () => {
   describe('getErrDetails', () => {

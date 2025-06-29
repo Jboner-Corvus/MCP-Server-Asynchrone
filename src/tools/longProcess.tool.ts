@@ -44,7 +44,7 @@ export async function doWorkSpecific(
     throw new Error('Échec simulé dans le worker.');
   }
 
-  await new Promise(resolve => setTimeout(resolve, params.durationMs));
+  await new Promise((resolve) => setTimeout(resolve, params.durationMs));
 
   const endTime = new Date();
   const result: LongProcessResultType = {
@@ -55,7 +55,7 @@ export async function doWorkSpecific(
     durationTakenMs: endTime.getTime() - startTime.getTime(),
     inputUserId: params.userId,
   };
-  
+
   logger.info({ taskId }, `Travail terminé pour la tâche ${taskId}`);
   return result;
 }
@@ -87,7 +87,7 @@ export const longProcessTool = {
     if (args.callbackUrl && !isValidHttpUrl(args.callbackUrl, `${TOOL_NAME}-execute`)) {
       throw new UserError("Format de l'URL de rappel invalide.");
     }
-    
+
     // CORRECTION : Le type de contenu a été changé en 'text' pour être valide.
     // L'information a été placée dans la propriété 'text'.
     context.streamContent?.({
@@ -102,7 +102,7 @@ export const longProcessTool = {
       toolName: TOOL_NAME,
       cbUrl: args.callbackUrl,
     });
-    
+
     let response = `Tâche "${TOOL_NAME}" (ID: ${jobId || taskId}) mise en file d'attente.`;
     if (args.callbackUrl) {
       response += ` Une notification sera envoyée à ${args.callbackUrl}.`;

@@ -37,8 +37,10 @@ export const taskQueue = new Queue<AsyncTaskJobPayload>(TASK_QUEUE_NAME, {
 
 // CORRECTION : Ajout de la 'dead-letter-queue' pour les échecs permanents
 export const deadLetterQueue = new Queue(DEAD_LETTER_QUEUE_NAME, {
-    connection: redisConnection,
+  connection: redisConnection,
 });
 
 taskQueue.on('error', (err) => logger.error({ err }, "Erreur de la file d'attente BullMQ"));
-logger.info(`File d'attente '${TASK_QUEUE_NAME}' initialisée pour ${config.REDIS_HOST}:${config.REDIS_PORT}`);
+logger.info(
+  `File d'attente '${TASK_QUEUE_NAME}' initialisée pour ${config.REDIS_HOST}:${config.REDIS_PORT}`
+);
