@@ -1,55 +1,69 @@
-// src/server.ts (Version Corrigée - Erreurs de Type)
+// src/server.ts (Version Finale Définitive)
 
 import { FastMCP } from 'fastmcp';
+import type { IncomingMessage } from 'http';
+import { randomUUID } from 'crypto';
+
+import logger from './logger.js';
+import { config } from './config.js';
 import type { SessionData } from './types.js';
 import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
 
+// Cette fonction est appelée pour chaque nouvelle connexion et garantit
+// qu'une session (authentifiée ou invitée) est toujours créée.
+const authenticate = async (request: IncomingMessage): Promise<SessionData> => {
+  const clientIp = String(request.headers['x-forwarded-for'] || request.socket.remoteAddress || 'unknown');
+  const authorizationHeader = request.headers.authorization;
+  const token = authorizationHeader?.startsWith('Bearer ') ? authorizationHeader.substring(7) : null;
+
+  if (token && token === config.AUTH_TOKEN) {
+    logger.info({ clientIp }, 'Authentication successful, creating authenticated session.');
+    return {
+      id: randomUUID(),
+      clientIp,
+      authenticatedAt: Date.now(),
+      permissions: ['read', 'write'],
+      isAuthenticated: true,
+    };
+  }
+
+  if (token) {
+    logger.warn({ clientIp }, 'Invalid token provided, creating guest session.');
+  } else {
+    logger.info({ clientIp }, 'No token provided, creating guest session.');
+  }
+  
+  return {
+    id: randomUUID(),
+    clientIp,
+    authenticatedAt: Date.now(),
+    permissions: ['read'],
+    isAuthenticated: false,
+  };
+};
+
 const server = new FastMCP<SessionData>({
   name: 'MCP-Serveur',
   version: '1.0.0',
-  instructions: 'Serveur modulaire pour opérations synchrones et asynchrones.',
-
-  authenticate: async (request): Promise<SessionData> => {
-    console.log("===== Tentative d'authentification =====", {
-      headers: request.headers,
-    });
-    const apiKey = request.headers['x-api-key'];
-
-    if (apiKey === 'user_key' || apiKey === 'admin_key') {
-      const isAdmin = apiKey === 'admin_key';
-      console.log(`Authentification réussie pour : ${apiKey}`);
-      return {
-        id: `session_${Date.now()}`,
-        userId: apiKey,
-        permissions: isAdmin ? ['read', 'write'] : ['read'],
-        clientIp: request.headers['x-forwarded-for']?.toString() || 'unknown',
-        authenticatedAt: Date.now(),
-      };
-    }
-
-    console.warn("Échec de l'authentification, création d'une session non authentifiée.");
-    throw new Error('Unauthorized');
-  },
-  health: { enabled: true },
+  authenticate: authenticate,
 });
 
-// Enregistrement de tous les outils disponibles pour le serveur
-console.log('Enregistrement des outils...');
+logger.info('Registering tools...');
 server.addTool(debugContextTool);
 server.addTool(longProcessTool);
 server.addTool(synchronousExampleTool);
-console.log('Outils enregistrés.');
+logger.info('Tools registered.');
 
-// Démarrage du serveur
-const transportType = process.argv.includes('--http-stream') ? 'httpStream' : 'stdio';
+const port = 8080;
+
 server.start({
-  transportType: transportType,
+  transportType: 'httpStream',
   httpStream: {
-    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 8080,
+    port: port,
     endpoint: '/mcp',
   },
 });
 
-console.log(`Serveur MCP démarré en mode ${transportType} sur le port ${process.env.PORT || 8080}`);
+logger.info(`Server started in httpStream mode on port ${port}`);

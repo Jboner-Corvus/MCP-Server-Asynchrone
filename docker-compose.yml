@@ -1,12 +1,11 @@
+# docker-compose.yml (Version finale et structurée)
 services:
-  # NGINX : Point d'entrée qui gère les requêtes externes.
   nginx:
     image: nginx:1.27-alpine
     container_name: fastmcp_nginx
     ports:
-      - '${HOST_PORT:-8080}:8080'
+      - "8080:8080"
     volumes:
-      # La configuration Nginx est requise (voir ci-dessous)
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - fastmcp-server
@@ -14,7 +13,6 @@ services:
     networks:
       - app_net
 
-  # SERVEUR FastMCP : Ne gère que les requêtes directes.
   fastmcp-server:
     build:
       context: .
@@ -32,12 +30,10 @@ services:
     networks:
       - app_net
 
-  # WORKER : Gère les tâches asynchrones en arrière-plan.
   worker:
     build:
       context: .
       dockerfile: Dockerfile
-    # La commande pour démarrer spécifiquement le worker
     command: pnpm run start:worker
     container_name: fastmcp_worker
     env_file: .env
@@ -52,7 +48,6 @@ services:
     networks:
       - app_net
 
-  # REDIS : File d'attente pour BullMQ.
   redis:
     image: redis:7.2-alpine
     container_name: fastmcp_redis
@@ -73,3 +68,4 @@ volumes:
 
 networks:
   app_net:
+    driver: bridge

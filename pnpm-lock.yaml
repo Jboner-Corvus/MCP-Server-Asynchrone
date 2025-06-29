@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  fastmcp: file:fastmcp-1.0.0.tgz
+  fastmcp: file:./fastmcp-1.0.0.tgz
 
 importers:
   .:
@@ -2518,7 +2518,7 @@ packages:
   fastmcp@file:fastmcp-1.0.0.tgz:
     resolution:
       {
-        integrity: sha512-xOO6NBRiQwXAkJigwqP9OntDi3LgbH58AA58S+7umavl0pRnWD5v4s+DjCAXFvJrDxHpCYn7aX2SHHKceXKUhg==,
+        integrity: sha512-rceGoGzQjNsq1SsvqLn5JI69XdpOgilpLbrkGSP2Zy8aGhoxTZzck23uF72jXVH+lNcIBOvVPpYstrcGQkVw3A==,
         tarball: file:fastmcp-1.0.0.tgz,
       }
     version: 1.0.0
