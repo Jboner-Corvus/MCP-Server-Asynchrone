@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Client MCP Robuste (Bonnes Pratiques)</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; background: #f4f4f9; color: #333; }
+        .container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007aff; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.2s; }
+        button#disconnectBtn { background-color: #dc3545; }
+        button:hover { opacity: 0.8; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; opacity: 1; }
+        #results { max-height: 400px; overflow-y: auto; background: #eef; padding: 15px; border: 1px solid #dde; border-radius: 4px; white-space: pre-wrap; font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace; font-size: 14px; line-height: 1.6; }
+        #status { padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 15px; }
+        #status.disconnected { background-color: #ffbaba; color: #d8000c; }
+        #status.connecting { background-color: #feefb3; color: #9f6000; }
+        #status.connected { background-color: #dff2bf; color: #270; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Client MCP Robuste</h1>
+        
+        <div id="status" class="disconnected">Déconnecté</div>
+
+        <div id="connection-form">
+            <div class="form-group">
+                <label for="serverUrl">URL du Serveur:</label>
+                <input type="text" id="serverUrl" value="http://192.168.2.56:8080/mcp">
+            </div>
+            <div class="form-group">
+                <label for="authToken">Token d'Authentification (Bearer Token):</label>
+                <input type="text" id="authToken" value="Qp5brxkUkTbmWJHmdrGYUjfgNY1hT9WOxUmzpP77JU0">
+            </div>
+            <button id="connectBtn">🔌 Connecter</button>
+        </div>
+
+        <div id="tools-form" style="display: none;">
+            <button id="callToolBtn">🔧 Appeler "debugContext"</button>
+            <button id="disconnectBtn">❌ Déconnecter</button>
+        </div>
+        
+        <h3>Journal des Événements:</h3>
+        <div id="results"></div>
+    </div>
+
+<script>
+    // --- Éléments du DOM ---
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const callToolBtn = document.getElementById('callToolBtn');
+    const statusDiv = document.getElementById('status');
+    const resultsDiv = document.getElementById('results');
+    const connectionForm = document.getElementById('connection-form');
+    const toolsForm = document.getElementById('tools-form');
+    
+    // --- Gestion de l'état du client ---
+    const client = {
+        state: 'disconnected', // 'disconnected', 'connecting', 'connected'
+        sessionId: null,
+        requestId: 1,
+        streamController: null, // Pour pouvoir annuler le fetch
+        headers: {},
+        url: ''
+    };
+
+    // --- Fonctions de mise à jour de l'UI ---
+    function updateUI() {
+        statusDiv.textContent = `État : ${client.state}`;
+        statusDiv.className = client.state;
+
+        connectionForm.style.display = client.state === 'disconnected' ? 'block' : 'none';
+        toolsForm.style.display = client.state === 'connected' ? 'block' : 'none';
+        
+        connectBtn.disabled = client.state === 'connecting';
+    }
+
+    // --- Fonction de log ---
+    const log = (message, data) => {
+        const p = document.createElement('p');
+        p.style.borderBottom = '1px solid #ccc';
+        p.style.padding = '5px';
+        const content = data ? `${message} \n${JSON.stringify(data, null, 2)}` : message;
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${content}`;
+        resultsDiv.appendChild(p);
+        resultsDiv.scrollTop = resultsDiv.scrollHeight;
+    };
+
+    // --- Logique de connexion et de streaming ---
+    async function connect() {
+        if (client.state !== 'disconnected') return;
+
+        client.state = 'connecting';
+        client.url = document.getElementById('serverUrl').value;
+        const token = document.getElementById('authToken').value;
+        client.headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            client.headers['Authorization'] = `Bearer ${token}`;
+        }
+        updateUI();
+        log('Tentative de connexion...');
+
+        try {
+            client.streamController = new AbortController();
+            const initRequest = { jsonrpc: "2.0", id: client.requestId++, method: "initialize", params: {} };
+            
+            const response = await fetch(client.url, {
+                method: 'POST',
+                headers: client.headers,
+                body: JSON.stringify(initRequest),
+                signal: client.streamController.signal
+            });
+
+            if (!response.ok) throw new Error(`Échec de l'initialisation: ${response.statusText}`);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            // La connexion est établie, on peut considérer l'état comme connecté
+            client.state = 'connected';
+            updateUI();
+
+            // Boucle de lecture du flux
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                chunk.split('\n').filter(str => str.length > 0).forEach(handleMessage);
+            }
+            log('Le flux a été fermé par le serveur.');
+            disconnect();
+
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                log('Connexion annulée par l\'utilisateur.');
+            } else {
+                log(`ERREUR: ${e.message}`);
+            }
+            disconnect(); // Assure un état propre en cas d'erreur
+        }
+    }
+
+    function handleMessage(messageStr) {
+        try {
+            const message = JSON.parse(messageStr);
+            log('Message reçu:', message);
+
+            if (message.id === 1 && message.result && message.result.sessionId) {
+                client.sessionId = message.result.sessionId;
+                log(`Session initialisée avec succès: ${client.sessionId}`);
+            }
+        } catch (err) {
+            log(`Erreur de parsing JSON: ${err.message}`);
+        }
+    }
+    
+    async function sendMessage(method, params) {
+        if (client.state !== 'connected') {
+            log('Impossible d\'envoyer le message: non connecté.');
+            return;
+        }
+
+        const payload = { jsonrpc: "2.0", id: client.requestId++, method, params };
+        const headersWithSession = { ...client.headers, 'X-Session-ID': client.sessionId };
+        
+        try {
+            log('Envoi du message:', payload);
+            await fetch(client.url, {
+                method: 'POST',
+                headers: headersWithSession,
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            log(`Erreur lors de l'envoi du message: ${e.message}`);
+            disconnect();
+        }
+    }
+
+    function disconnect() {
+        if (client.streamController) {
+            client.streamController.abort(); // Annule le fetch en cours
+        }
+        client.state = 'disconnected';
+        client.sessionId = null;
+        client.requestId = 1;
+        log('Déconnecté.');
+        updateUI();
+    }
+
+    // --- Écouteurs d'événements ---
+    document.addEventListener('DOMContentLoaded', updateUI);
+    connectBtn.addEventListener('click', connect);
+    disconnectBtn.addEventListener('click', disconnect);
+    callToolBtn.addEventListener('click', () => {
+        sendMessage('tools/call', {
+            name: "debugContext",
+            arguments: { message: "Test depuis le client refactorisé" }
+        });
+    });
+
+</script>
+</body>
+</html>
