@@ -19,14 +19,14 @@
 - [📋 Prérequis](#-prérequis)
 - [🚀 Installation & Configuration Initiale](#-installation--configuration-initiale)
 - [⚙️ Exécution et Gestion du Serveur](#️-exécution-et-gestion-du-serveur)
-- [🔌 Intégration avec le client N8N](#-intégration-avec-le-client-n8n)
+- [🔍 Utilisation de l'Inspecteur (Client UI)](#-utilisation-de-linspecteur-client-ui)
 - [🤝 Contribution](#-contribution)
 
 ---
 
 ## 🌟 <font color="#3498DB">Introduction</font>
 
-**MCP-Serveur** est un serveur robuste, conçue pour la performance et la modularité. Il permet de gérer avec élégance des tâches complexes, qu'elles soient immédiates (synchrones) ou de longue durée (asynchrones), grâce à une architecture découplée s'appuyant sur :
+**MCP-Serveur** est un serveur robuste, conçu pour la performance et la modularité. Il permet de gérer avec élégance des tâches complexes, qu'elles soient immédiates (synchrones) ou de longue durée (asynchrones), grâce à une architecture découplée s'appuyant sur :
 
 - **FastMCP** : Pour un traitement efficace des requêtes et une gestion de session.
 - **Docker & Docker Compose** : Pour une conteneurisation fiable et un déploiement simplifié.
@@ -41,7 +41,7 @@ Ce document vous guidera à travers l'installation, l'exécution et l'extension 
 
 Avant de commencer, assurez-vous que les éléments suivants sont installés et configurés sur votre système :
 
-- <img src="https://img.shields.io/badge/Docker_Engine-nécessaire-blue?logo=docker" alt="[Badge Docker Engine]"> : Pour l'exécution des conteneurs.
+- <img src="https://img.shields.io/badge/Docker_Engine-nécessaire-blue?logo=docker" alt="[Badge Docker Engine]"> : Pour l'exécution des conteneurs. Le script de gestion vérifiera sa présence.
 - <img src="https://img.shields.io/badge/Docker_Compose_(v2+)-nécessaire-blue?logo=docker" alt="[Badge Docker Compose]"> : Pour l'orchestration des services. Le script `run.sh` vérifiera sa présence.
 - <img src="https://img.shields.io/badge/pnpm-recommandé-orange?logo=pnpm" alt="[Badge pnpm]"> : (Optionnel, mais recommandé pour le développement local) Pour la gestion des dépendances Node.js et l'exécution des scripts.
 
@@ -69,53 +69,60 @@ Suivez ces étapes pour mettre en place votre environnement :
       ./run.sh
       ```
     - **Fichier d'Environnement (`.env`)** :
-      - Si le fichier `.env` est manquant, le script proposera de le créer.
+      - Si le fichier `.env` est manquant, créer le en copiant le modèle `.env.example`.
       - ⚠️ **Action Requise** : Éditez manuellement le fichier `.env` pour définir des valeurs **fortes et uniques** pour `AUTH_TOKEN`, `REDIS_PASSWORD`, `WEBHOOK_SECRET`, et toute autre variable sensible ou spécifique à votre déploiement.
-        ```dotenv
-        # variables à personnaliser dans .env
-        PORT=8081
-        NODE_ENV=production
-        LOG_LEVEL=info
-        AUTH_TOKEN="VOTRE_TOKEN_SECRET_ULTRA_ROBUSTE"
-        REDIS_HOST=redis
-        REDIS_PORT=6379
-        REDIS_PASSWORD="VOTRE_MOT_DE_PASSE_REDIS_COMPLEXE"
-        WEBHOOK_SECRET="VOTRE_SECRET_WEBHOOK_LONG_ET_UNIQUE"
-        ```
-    - **(Recommandé)** Validez votre configuration `.env` en utilisant l'option `15` ("🛡️ VALIDER Paramètres d'Environnement (.env)") dans le menu de `run.sh`.
+      ```dotenv
+      # variables à personnaliser dans .env
+      PORT=8081
+      NODE_ENV=production
+      LOG_LEVEL=info
+      AUTH_TOKEN="VOTRE_TOKEN_SECRET_ULTRA_ROBUSTE"
+      REDIS_HOST=redis
+      REDIS_PORT=6379
+      REDIS_PASSWORD="VOTRE_MOT_DE_PASSE_REDIS_COMPLEXE"
+      WEBHOOK_SECRET="VOTRE_SECRET_WEBHOOK_LONG_ET_UNIQUE"
+      ```
 
 ---
 
 ## ⚙️ <font color="#3498DB">Exécution et Gestion du Serveur</font>
 
-Utilisez le script `run.sh` pour la majorité des opérations de gestion :
+Utilisez le script `run.sh` pour toutes les opérations de gestion du cycle de vie des services.
 
-- **Installer** : Option `1`,
-- **Visualiser les journaux (logs)** : Option `11`.
+- **Démarrer / Mettre à jour** : Option `1`. Cette commande construit les images si nécessaire et lance tous les services en arrière-plan.
+- **Redémarrer complètement** : Option `2`. Arrête, reconstruit, puis redémarre tous les services.
+- **Arrêter tous les services** : Option `3`. Arrête et supprime les conteneurs.
+- **Reconstruire les images (sans cache)** : Option `4`. Force une reconstruction complète de toutes les images Docker sans utiliser le cache.
 
 ---
 
-## 🔌 <font color="#3498DB">Intégration avec le client N8N </font>
+## 🔍 <font color="#3498DB">Utilisation de l'Inspecteur (Client UI)</font>
 
-Le serveur **MCP-Serveur** peut être facilement intégré avec **n8n** pour automatiser vos workflows en exploitant les capacités du **Model Context Protocol (MCP)**. Cette intégration permet d'orchestrer des tâches complexes et de créer des flux d'automatisation sophistiqués.
+L'Inspecteur MCP fournit une interface utilisateur web pour interagir avec votre serveur.
 
-1. **Ajout du Nœud MCP Client** :
-   - Dans votre workflow n8n, ajoutez un nœud de type **MCP Client Tool**.
-   - Ce nœud servira de pont entre n8n et votre serveur MCP.
+1.  **Lancement** :
+    Pour lancer l'inspecteur, exécutez la commande suivante :
+    ```bash
+    npx @modelcontextprotocol/inspector
+    ```
+    Cette commande démarre un serveur proxy et ouvre automatiquement l'interface client dans votre navigateur, généralement à l'adresse `http://localhost:6274`.
 
-2. **Configuration du Point de Terminaison SSE** :
-   - **Endpoint SSE** : `http://VOTRE_IP:8081/sse`
-   - 💡 **Note** : Remplacez `VOTRE_IP` par l'adresse IP réelle de votre serveur MCP (exemple : `192.168.2.16`).
-   - Ce point de terminaison utilise les **Server-Sent Events** pour une communication en temps réel.
+2.  **Configuration de la Connexion** :
+    Dans la barre latérale de l'interface, vous devez configurer le mode de connexion à votre serveur MCP.
+    - **Conneion au serveur** : Sélectionnez `Streamable HTTP` ou `SSE` et entrez l'URL complète du serveur (par exemple `http://VOTRE_IP:8081/mcp`).
+    - **Authentification** : Si votre serveur nécessite un jeton d'authentification, dépliez la section "Authentication" et entrez votre `Bearer Token`.
 
-3. **Configuration de l'Authentification** :
-   - **Type d'authentification** : `Bearer Token`
-   - Créez une nouvelle credential **Bearer Auth** dans n8n.
-   - Utilisez la valeur de votre variable `AUTH_TOKEN` définie dans le fichier `.env`.
-   - Cette authentification garantit la sécurité des communications entre n8n et votre serveur.
+3.  **Connexion** :
+    Une fois la configuration terminée, cliquez sur le bouton **"Connect"**. L'inspecteur tentera d'établir la connexion avec votre serveur MCP.
+
+4.  **Interaction** :
+    Une fois connecté, vous pouvez utiliser les différents onglets pour interagir avec le serveur :
+    - **Resources** : Lister et lire les ressources disponibles.
+    - **Prompts** : Lister et exécuter les prompts.
+    - **Tools** : Lister et appeler les outils avec des paramètres spécifiques.
 
 ---
 
 ## 🤝 <font color="#3498DB">Contribution</font>
 
-Les contributions sont les bienvenues ! ouvrez une _issue_ pour discuter des changements que vous souhaitez apporter.
+Les contributions sont les bienvenues ! Ouvrez une _issue_ pour discuter des changements que vous souhaitez apporter.
