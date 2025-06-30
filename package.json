@@ -46,12 +46,13 @@
   "dependencies": {
     "bullmq": "^5.53.0",
     "dotenv": "^16.5.0",
-    "fastmcp": "3.1.1",
+    "fastmcp": "3.7.0",
     "pino": "^9.7.0",
     "zod": "^3.25.28"
   },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@tsconfig/node24": "^24.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.21",
     "@typescript-eslint/eslint-plugin": "^8.32.1",

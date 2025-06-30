@@ -1,4 +1,5 @@
 {
+  // Removed "extends": "@tsconfig/node24/tsconfig.json" to fix missing file error
   "compilerOptions": {
     /* Basic Options */
     "target": "ES2022",
