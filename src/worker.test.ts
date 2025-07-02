@@ -5,7 +5,7 @@ import { config } from './config';
 import logger from './logger';
 import * as queueModule from './queue'; // Import the entire module
 import * as webhookUtils from './utils/webhookUtils';
-import * as errorUtils from './utils/errorUtils';
+import *s errorUtils from './utils/errorUtils';
 import * as longProcessTool from './tools/longProcess.tool'; // Import the actual module
 
 // Mock dependencies
@@ -45,7 +45,7 @@ describe('initWorker', () => {
     // Mock implementations
     vi.mocked(queueModule.initQueues).mockReturnValue({
       taskQueue: { name: 'mock-task-queue', defaultJobOptions: { attempts: 3 } } as any,
-      deadLetterQueue: { name: 'mock-dead-letter-queue' } as any,
+      deadLetterQueue: { name: 'mock-dead-letter-queue', add: vi.fn() } as any,
       redisConnection: { host: 'mock-redis', port: 1234 } as any,
     });
 
@@ -78,8 +78,17 @@ describe('initWorker', () => {
     vi.mocked(config).TASK_QUEUE_NAME = 'async-tasks';
 
     // Mock webhookUtils
-    mockSendWebhook = vi.mocked(webhookUtils).sendWebhook;
+    mockSendWebhook = vi.mocked(webhookUtils).sendWebhook.mockResolvedValue(undefined);
     mockGetErrDetails = vi.mocked(errorUtils).getErrDetails;
+
+    // Mock process.on to allow direct calling of handlers
+    vi.spyOn(process, 'on').mockImplementation((event, handler) => {
+      if (event === 'SIGTERM' || event === 'SIGINT') {
+        // Store the handler for later direct invocation in tests
+        (process as any)[`_mock_${event}_handler`] = handler;
+      }
+      return process; // Return process to allow chaining
+    });
   });
 
   afterEach(() => {
@@ -171,6 +180,7 @@ describe('initWorker', () => {
     });
     const { initWorker: actualInitWorker } = await import('./worker.js');
 
+    // Mock process.on for this specific test to avoid interference with other tests
     const processOnSpy = vi.spyOn(process, 'on').mockReturnValue({} as any);
     await actualInitWorker(logger, config);
     expect(processOnSpy).toHaveBeenCalledWith('SIGTERM', expect.any(Function));
@@ -196,6 +206,9 @@ describe('initWorker', () => {
       await actualInitWorker(logger, config);
       // Extract the job processing function passed to the Worker constructor
       workerProcessor = vi.mocked(Worker).mock.calls[0][1];
+
+      // Clear mock calls for logger.child before each test in this describe block
+      mockLoggerChild.child.mockClear();
     });
 
     it('should successfully process a job and send webhooks', async () => {
@@ -216,9 +229,10 @@ describe('initWorker', () => {
       vi.mocked(longProcessTool.doWorkSpecific).mockResolvedValue(mockProcessorResult);
 
       await workerProcessor(mockJob);
+      const jobLogSpy = mockLoggerChild.child.mock.results[0].value; // Capture after workerProcessor call
 
       expect(mockLoggerChild.child).toHaveBeenCalledWith(expect.objectContaining({ jobId: 'job-123', taskId: 'task-456' }));
-      expect(mockLoggerChild.child().info).toHaveBeenCalledWith(
+      expect(jobLogSpy.info).toHaveBeenCalledWith(
         expect.objectContaining({ paramsPreview: JSON.stringify(mockJob.data.params)?.substring(0, 100) }),
         'Traitement du job'
       );
@@ -237,7 +251,7 @@ describe('initWorker', () => {
         'asynchronousTaskSimulatorEnhanced',
         false
       );
-      expect(mockLoggerChild.child().info).toHaveBeenCalledWith('Logique du job terminée avec succès.');
+      expect(jobLogSpy.info).toHaveBeenCalledWith('Logique du job terminée avec succès.');
     });
 
     it('should handle job processing for an unknown tool', async () => {
@@ -255,9 +269,10 @@ describe('initWorker', () => {
       await expect(workerProcessor(mockJob)).rejects.toThrow(
         'Aucun processeur trouvé pour l\'outil : unknownTool'
       );
+      const jobLogSpy = mockLoggerChild.child.mock.results[0].value; // Capture after workerProcessor call
 
       expect(mockLoggerChild.child).toHaveBeenCalledWith(expect.objectContaining({ jobId: 'job-456', taskId: 'task-789' }));
-      expect(mockLoggerChild.child().error).toHaveBeenCalledWith(
+      expect(jobLogSpy.error).toHaveBeenCalledWith(
         expect.stringContaining('Aucun processeur pour l\'outil : unknownTool')
       );
       expect(mockSendWebhook).not.toHaveBeenCalled();
@@ -281,12 +296,20 @@ describe('initWorker', () => {
       vi.mocked(errorUtils.getErrDetails).mockReturnValue({ message: 'Processing failed', stack: 'mock stack' });
 
       await expect(workerProcessor(mockJob)).rejects.toThrow('Processing failed');
+      const jobLogSpy = mockLoggerChild.child.mock.results[0].value; // Capture after workerProcessor call
 
-      expect(mockLoggerChild.child().error).toHaveBeenCalledWith(
+      expect(jobLogSpy.error).toHaveBeenCalledWith(
         expect.objectContaining({ err: { message: 'Processing failed', stack: 'mock stack' } }),
         'Erreur de traitement du job.'
       );
-      expect(mockSendWebhook).toHaveBeenCalledTimes(2); // Initial and final webhook
+      expect(mockSendWebhook).toHaveBeenCalledTimes(2);
+      expect(mockSendWebhook).toHaveBeenCalledWith(
+        'http://callback.url',
+        expect.objectContaining({ status: 'processing' }),
+        'task-abc',
+        'asynchronousTaskSimulatorEnhanced',
+        false
+      );
       expect(mockSendWebhook).toHaveBeenCalledWith(
         'http://callback.url',
         expect.objectContaining({ status: 'error', error: { message: 'Processing failed', stack: 'mock stack' } }),
@@ -322,14 +345,6 @@ describe('initWorker', () => {
       };
       const mockError = new Error('Job failed permanently');
       vi.mocked(errorUtils.getErrDetails).mockReturnValue({ message: 'Job failed permanently', stack: 'mock stack' });
-      vi.mocked(queueModule.initQueues).mockReturnValue({
-        taskQueue: { name: 'mock-task-queue', defaultJobOptions: { attempts: 3 } } as any,
-        deadLetterQueue: { name: 'mock-dead-letter-queue', add: vi.fn() } as any,
-        redisConnection: { host: 'mock-redis', port: 1234 } as any,
-      });
-
-      // Re-initialize worker to get the updated queue mocks
-      await actualInitWorker(logger, config);
 
       // Simulate the 'failed' event
       await mockWorkerInstance.on.mock.calls.find(call => call[0] === 'failed')[1](mockJob, mockError);
@@ -341,7 +356,10 @@ describe('initWorker', () => {
       expect(queueModule.initQueues().deadLetterQueue.add).toHaveBeenCalledWith(
         'job-name',
         expect.objectContaining({ originalJobId: 'job-failed-dlq', failureReason: { message: 'Job failed permanently', stack: 'mock stack' } }),
-        expect.objectContaining({ removeOnComplete: true, removeOnFail: false })
+        expect.objectContaining({
+          removeOnComplete: true,
+          removeOnFail: false,
+        })
       );
       expect(mockLoggerChild.info).toHaveBeenCalledWith(
         expect.objectContaining({ jobId: 'job-failed-dlq', dlq: 'mock-dlq-name' }),
@@ -389,7 +407,7 @@ describe('initWorker', () => {
       mockWorkerInstance.close = mockClose;
 
       // Simulate SIGTERM
-      const sigtermHandler = vi.spyOn(process, 'on').mock.calls.find(call => call[0] === 'SIGTERM')[1];
+      const sigtermHandler = (process as any)._mock_SIGTERM_handler;
       await expect(sigtermHandler()).rejects.toThrow("process.exit");
 
       expect(mockLoggerChild.warn).toHaveBeenCalledWith('Signal SIGTERM reçu. Fermeture du worker...');
@@ -404,7 +422,7 @@ describe('initWorker', () => {
       mockWorkerInstance.close = mockClose;
 
       // Simulate SIGINT
-      const sigintHandler = vi.spyOn(process, 'on').mock.calls.find(call => call[0] === 'SIGINT')[1];
+      const sigintHandler = (process as any)._mock_SIGINT_handler;
       await expect(sigintHandler()).rejects.toThrow("process.exit");
 
       expect(mockLoggerChild.warn).toHaveBeenCalledWith('Signal SIGINT reçu. Fermeture du worker...');
@@ -421,7 +439,7 @@ describe('initWorker', () => {
       vi.mocked(errorUtils.getErrDetails).mockReturnValue({ message: 'Close failed', stack: 'mock stack' });
 
       // Simulate SIGTERM with error
-      const sigtermHandler = vi.spyOn(process, 'on').mock.calls.find(call => call[0] === 'SIGTERM')[1];
+      const sigtermHandler = (process as any)._mock_SIGTERM_handler;
       await expect(sigtermHandler()).rejects.toThrow("process.exit");
 
       expect(mockLoggerChild.warn).toHaveBeenCalledWith('Signal SIGTERM reçu. Fermeture du worker...');
