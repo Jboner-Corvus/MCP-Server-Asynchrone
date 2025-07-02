@@ -163,7 +163,9 @@ async function applicationEntryPoint() {
 // =============================================================================
 process.on('uncaughtException', (err, origin) => {
   logger.fatal({ err: getErrDetails(err), origin }, `EXCEPTION NON CAPTURÉE. Arrêt forcé.`);
-  process.exit(1);
+  if (config.NODE_ENV !== 'test') {
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason) => {
