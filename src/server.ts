@@ -25,7 +25,7 @@ import { getErrDetails } from './utils/errorUtils.js';
 // GESTIONNAIRE D'AUTHENTIFICATION
 // =============================================================================
 
-const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
+export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const clientIp =
     (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
     req.socket?.remoteAddress ||
@@ -69,7 +69,7 @@ const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
 // =============================================================================
 // POINT D'ENTRÉE PRINCIPAL DE L'APPLICATION
 // =============================================================================
-async function applicationEntryPoint() {
+export async function applicationEntryPoint() {
   logger.info(
     `Démarrage du serveur en mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET}...`
   );
@@ -173,10 +173,4 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Lancement de l'application
-applicationEntryPoint().catch((err) => {
-  logger.fatal(
-    { err: getErrDetails(err) },
-    "Erreur fatale non interceptée à la racine de l'application."
-  );
-  process.exit(1);
-});
+

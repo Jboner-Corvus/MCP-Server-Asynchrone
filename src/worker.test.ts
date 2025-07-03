@@ -5,7 +5,7 @@ import { config } from './config';
 import logger from './logger';
 import * as queueModule from './queue'; // Import the entire module
 import * as webhookUtils from './utils/webhookUtils';
-import *s errorUtils from './utils/errorUtils';
+import * as errorUtils from './utils/errorUtils';
 import * as longProcessTool from './tools/longProcess.tool'; // Import the actual module
 
 // Mock dependencies
@@ -362,7 +362,7 @@ describe('initWorker', () => {
         })
       );
       expect(mockLoggerChild.info).toHaveBeenCalledWith(
-        expect.objectContaining({ jobId: 'job-failed-dlq', dlq: 'mock-dlq-name' }),
+        expect.objectContaining({ jobId: 'job-failed-dlq', dlq: 'dead-letter-tasks' }),
         'Job déplacé vers la DLQ.'
       );
     });

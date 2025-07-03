@@ -7,5 +7,6 @@ export default defineConfig({
     environment: 'node',
     teardownTimeout: 10000,
     forceExit: true,
+    setupFiles: ['./vitest.setup.ts'],
   },
 });
