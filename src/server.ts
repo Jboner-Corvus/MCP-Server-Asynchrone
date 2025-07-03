@@ -25,7 +25,7 @@ import { getErrDetails } from './utils/errorUtils.js';
 // GESTIONNAIRE D'AUTHENTIFICATION
 // =============================================================================
 
-const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
+export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const clientIp =
     (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
     req.socket?.remoteAddress ||
@@ -39,20 +39,14 @@ const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    authLog.warn("Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
-    throw new Response(JSON.stringify({ error: 'Accès non autorisé' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    authLog.warn({ clientIp }, "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
+    throw new Error('Accès non autorisé');
   }
 
   const token = authHeader.substring(7);
   if (token !== config.AUTH_TOKEN) {
     authLog.warn("Tentative d'accès non autorisé: Jeton invalide.");
-    throw new Response(JSON.stringify({ error: 'Jeton invalide' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    throw new Error('Jeton invalide');
   }
 
   const sessionAuthData: AuthData = {
@@ -69,7 +63,7 @@ const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
 // =============================================================================
 // POINT D'ENTRÉE PRINCIPAL DE L'APPLICATION
 // =============================================================================
-async function applicationEntryPoint() {
+export async function applicationEntryPoint() {
   logger.info(
     `Démarrage du serveur en mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET}...`
   );
@@ -163,7 +157,9 @@ async function applicationEntryPoint() {
 // =============================================================================
 process.on('uncaughtException', (err, origin) => {
   logger.fatal({ err: getErrDetails(err), origin }, `EXCEPTION NON CAPTURÉE. Arrêt forcé.`);
-  process.exit(1);
+  if (config.NODE_ENV !== 'test') {
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason) => {
@@ -171,10 +167,4 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Lancement de l'application
-applicationEntryPoint().catch((err) => {
-  logger.fatal(
-    { err: getErrDetails(err) },
-    "Erreur fatale non interceptée à la racine de l'application."
-  );
-  process.exit(1);
-});
+

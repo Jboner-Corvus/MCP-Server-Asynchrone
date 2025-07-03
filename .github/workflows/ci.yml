@@ -1,0 +1,66 @@
+# Nom du workflow, visible dans l'onglet "Actions" de GitHub
+name: Continuous Integration - Build & Test
+
+# Déclencheurs du workflow
+on:
+  # Se déclenche lors d'une nouvelle pull request ou d'une mise à jour
+  pull_request:
+    branches:
+      - main  # Adaptez si votre branche principale a un autre nom
+
+  # Se déclenche également lors d'un push sur la branche principale
+  push:
+    branches:
+      - main
+
+jobs:
+  # Job unique qui va exécuter toutes nos étapes de validation
+  validate:
+    # Utilise la dernière version d'Ubuntu comme environnement d'exécution
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1 : Récupération du code du dépôt
+      # Indispensable pour avoir accès à vos fichiers
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Étape 2 : Installation de pnpm (le gestionnaire de paquets de votre projet)
+      # pnpm est plus rapide et efficace que npm ou yarn
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9 # Spécifiez la version de pnpm si nécessaire
+
+      # Étape 3 : Installation de Node.js
+      # Utilise la version 24, comme spécifié dans votre package.json
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm' # Active le cache pour les dépendances gérées par pnpm
+
+      # Étape 4 : Installation des dépendances du projet
+      # Cette étape est accélérée par le cache configuré ci-dessus
+      - name: Install dependencies
+        run: pnpm install
+
+      # Étape 5 : Lancement du linter
+      # Exécute le script "lint" de votre package.json pour vérifier la qualité du code
+      - name: Run Linter
+        run: pnpm run lint
+
+      # Étape 6 : Lancement des tests
+      # Exécute le script "test" de votre package.json avec Vitest
+      - name: Run Tests
+        run: pnpm run test
+
+      # Étape 7 : Vérification des types TypeScript
+      # Exécute le script "check-types" pour une validation statique
+      - name: Check Types
+        run: pnpm run check-types
+
+      # Étape 8 : Compilation du projet
+      # S'assure que le projet se compile correctement en TypeScript vers JavaScript
+      - name: Build Project
+        run: pnpm run build
