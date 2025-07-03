@@ -39,20 +39,14 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    authLog.warn("Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
-    throw new Response(JSON.stringify({ error: 'Accès non autorisé' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    authLog.warn({ clientIp }, "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
+    throw new Error('Accès non autorisé');
   }
 
   const token = authHeader.substring(7);
   if (token !== config.AUTH_TOKEN) {
     authLog.warn("Tentative d'accès non autorisé: Jeton invalide.");
-    throw new Response(JSON.stringify({ error: 'Jeton invalide' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    throw new Error('Jeton invalide');
   }
 
   const sessionAuthData: AuthData = {
