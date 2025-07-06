@@ -1,16 +1,19 @@
 // --- src/types.ts (Corrigé et Isolé) ---
 import { IncomingMessage } from 'http';
-import { FastMCPSession as BaseFastMCPSession, Tool, Context as ToolContext } from 'fastmcp';
+import { FastMCPSession as BaseFastMCPSession, Context as ToolContext, Tool as FastMCPTool } from 'fastmcp';
+import { z } from 'zod';
+import { StandardSchemaV1 } from '@standard-schema/spec';
+
+export interface FastMCPSessionAuth extends Record<string, unknown> { "~standard"?: unknown; }
 
 /**
  * Données d'authentification personnalisées.
  */
-export interface AuthData {
+export interface AuthData extends FastMCPSessionAuth {
   id: string;
   type: string;
   authenticatedAt: number;
   clientIp: string;
-  [key: string]: unknown; // Remplacé any par unknown
 }
 
 /**
@@ -19,7 +22,7 @@ export interface AuthData {
 export interface AppRuntimeSession extends BaseFastMCPSession<AuthData> {
   frameworkSessionId: string;
   request: IncomingMessage;
-  sendEvent: (event: string, data: unknown, id?: string) => void; // Remplacé any par unknown
+  sendEvent: (event: string, data: unknown, id?: string) => void;
   closeConnection: (reason?: string) => void;
   auth?: AuthData;
 }
@@ -28,9 +31,8 @@ export interface AppRuntimeSession extends BaseFastMCPSession<AuthData> {
  * Type guard pour vérifier si un objet est une instance valide de AppRuntimeSession.
  */
 export function isAppRuntimeSession(session: unknown): session is AppRuntimeSession {
-  // Remplacé any par unknown
-  if (!session || typeof session !== 'object') return false; // Vérification supplémentaire
-  const s = session as Record<string, unknown>; // Cast pour accès sécurisé
+  if (!session || typeof session !== 'object') return false;
+  const s = session as Record<string, unknown>;
 
   const hasCoreProperties =
     typeof s.frameworkSessionId === 'string' &&
@@ -41,7 +43,7 @@ export function isAppRuntimeSession(session: unknown): session is AppRuntimeSess
 
   if (s.auth !== undefined) {
     if (s.auth === null || typeof s.auth !== 'object') return false;
-    const auth = s.auth as Record<string, unknown>; // Cast pour accès sécurisé
+    const auth = s.auth as Record<string, unknown>;
     return (
       typeof auth.id === 'string' &&
       typeof auth.type === 'string' &&
@@ -52,4 +54,28 @@ export function isAppRuntimeSession(session: unknown): session is AppRuntimeSess
   return true;
 }
 
-export type { Tool, ToolContext };
+// Define the generic types for Tool
+export type Tool<T extends FastMCPSessionAuth, Params extends StandardSchemaV1> = FastMCPTool<T, Params>;
+
+export type { ToolContext };
+
+export function zodToStandardSchema<T extends z.ZodTypeAny>(zodSchema: T): StandardSchemaV1<z.infer<T>, z.infer<T>> {
+  return {
+    "~standard": {
+      version: 1,
+      vendor: "zod",
+      validate: (value: unknown) => {
+        const result = zodSchema.safeParse(value);
+        if (result.success) {
+          return { value: result.data };
+        } else {
+          return { issues: result.error.issues.map(issue => ({ message: issue.message })) };
+        }
+      },
+      types: {
+        input: {} as z.infer<T>,
+        output: {} as z.infer<T>,
+      },
+    },
+  };
+}

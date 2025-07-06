@@ -44,6 +44,7 @@
   "author": "Your Name/Team <your.email@example.com>",
   "license": "ISC",
   "dependencies": {
+    "@standard-schema/spec": "^1.0.0",
     "bullmq": "^5.53.0",
     "dotenv": "^16.5.0",
     "fastmcp": "3.7.0",

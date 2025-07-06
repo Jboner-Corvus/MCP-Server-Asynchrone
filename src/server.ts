@@ -9,7 +9,10 @@ import { randomUUID } from 'crypto';
 import type { IncomingMessage } from 'http';
 
 import { FastMCP } from 'fastmcp';
-import type { FastMCPSession, LoggingLevel, Tool } from 'fastmcp';
+import type { FastMCPSession, LoggingLevel } from 'fastmcp';
+import type { Tool } from './types.js';
+import { z } from 'zod';
+import { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Imports locaux
 import { config } from './config.js';
@@ -57,6 +60,7 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
     type: 'Bearer',
     authenticatedAt: Date.now(),
     clientIp,
+    "~standard": { parameters: {}, context: {} },
   };
 
   authLog.info({ authId: sessionAuthData.id }, 'Authentification réussie.');
@@ -95,12 +99,12 @@ export async function applicationEntryPoint() {
     },
   });
 
-  const toolsToRegister: Tool[] = [debugContextTool, longProcessTool, synchronousExampleTool];
-
   // Enregistrement des outils
-  toolsToRegister.forEach((tool) => server.addTool(tool));
+  server.addTool(debugContextTool);
+  server.addTool(longProcessTool);
+  server.addTool(synchronousExampleTool);
 
-  logger.info({ tools: toolsToRegister.map((t) => t.name) }, 'Outils enregistrés avec succès.');
+  logger.info({ tools: [debugContextTool, longProcessTool, synchronousExampleTool].map((t) => t.name) }, 'Outils enregistrés avec succès.');
 
   server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
     logger.info('Nouvelle session client établie.');

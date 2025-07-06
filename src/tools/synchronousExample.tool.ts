@@ -3,7 +3,7 @@
 import { z as zod } from 'zod';
 import type { Context, SerializableValue, TextContent } from 'fastmcp';
 import loggerInstance from '../logger.js';
-import type { AuthData as AuthDataType } from '../types.js';
+import { AuthData as AuthDataType, zodToStandardSchema } from '../types.js';
 
 const SYNC_TOOL_NAME = 'synchronousExampleToolEnhanced';
 
@@ -27,11 +27,12 @@ type SyncOutputTypeInternal = {
 export const synchronousExampleTool = {
   name: SYNC_TOOL_NAME,
   description: "Exemple d'outil synchrone.",
-  parameters: synchronousExampleParams,
+  parameters: zodToStandardSchema(synchronousExampleParams),
   execute: async (
-    args: SyncParamsType,
+    args: unknown,
     context: Context<AuthDataType>
   ): Promise<SyncResultType> => {
+    const typedArgs = args as SyncParamsType;
     // CORRIGÉ : `context.session` contient directement les données d'authentification.
     const authData = context.session;
     const clientLog = context.log;
@@ -39,29 +40,29 @@ export const synchronousExampleTool = {
       tool: SYNC_TOOL_NAME,
       clientIp: authData?.clientIp,
       appAuthId: authData?.id,
-      n8nSessionIdTool: args.userId,
+      n8nSessionIdTool: typedArgs.userId,
     });
 
     const logFnInfo = (message: string, data?: Record<string, SerializableValue>) => {
-      if (args.useClientLogger && clientLog) {
+      if (typedArgs.useClientLogger && clientLog) {
         clientLog.info(message, data);
       } else {
         serverLog.info(data, message);
       }
     };
-    logFnInfo(`Requête de tâche synchrone reçue.`, { params: args });
+    logFnInfo(`Requête de tâche synchrone reçue.`, { params: typedArgs });
 
-    if (args.delayMs && args.delayMs > 0) {
-      await new Promise((res) => setTimeout(res, args.delayMs));
+    if (typedArgs.delayMs && typedArgs.delayMs > 0) {
+      await new Promise((res) => setTimeout(res, typedArgs.delayMs));
     }
 
     const output: SyncOutputTypeInternal = {
-      processed: `PROCESSED: ${args.data.toUpperCase()}`,
+      processed: `PROCESSED: ${typedArgs.data.toUpperCase()}`,
       ts: Date.now(),
-      input: args,
+      input: typedArgs,
       appAuthId: authData?.id,
       clientIp: authData?.clientIp,
-      n8nSessionId: args.userId,
+      n8nSessionId: typedArgs.userId,
     };
 
     const result: SyncResultType = {

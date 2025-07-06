@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      '@standard-schema/spec':
+        specifier: ^1.0.0
+        version: 1.0.0
       bullmq:
         specifier: ^5.53.0
         version: 5.56.1

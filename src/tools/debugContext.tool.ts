@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import type { Context, SerializableValue } from 'fastmcp';
 import logger from '../logger.js';
-import { type AuthData } from '../types.js';
+import { AuthData, zodToStandardSchema } from '../types.js';
 
 const TOOL_NAME = 'correctDebugContextTool';
 
@@ -18,8 +18,9 @@ export type ParamsType = z.infer<typeof debugContextParams>;
 export const debugContextTool = {
   name: TOOL_NAME,
   description: "Affiche le contexte d'authentification et de session.",
-  parameters: debugContextParams,
-  execute: async (args: ParamsType, context: Context<AuthData>): Promise<string> => {
+  parameters: zodToStandardSchema(debugContextParams),
+  execute: async (args: unknown, context: Context<AuthData>): Promise<string> => {
+    const typedArgs = args as ParamsType;
     const authData = context.session;
     const clientLog = context.log;
 
@@ -30,7 +31,7 @@ export const debugContextTool = {
     });
 
     const logFn = (message: string, data?: Record<string, SerializableValue>) => {
-      if (args.useClientLogger && clientLog) {
+      if (typedArgs.useClientLogger && clientLog) {
         clientLog.info(message, data);
       } else {
         serverLog.info(data, message);
@@ -38,7 +39,7 @@ export const debugContextTool = {
     };
 
     let resultMessage = `Rapport de l'Outil de Débogage de Contexte:\n`;
-    resultMessage += `UserID (n8n, depuis argument): ${args.userId || 'Non Fourni'}\n`;
+    resultMessage += `UserID (n8n, depuis argument): ${typedArgs.userId || 'Non Fourni'}\n`;
 
     resultMessage += `\n--- Données d'Authentification (context.session) ---\n`;
     if (authData) {
