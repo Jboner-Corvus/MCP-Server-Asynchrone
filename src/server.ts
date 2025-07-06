@@ -98,10 +98,7 @@ export async function applicationEntryPoint() {
   const toolsToRegister = [debugContextTool, longProcessTool, synchronousExampleTool];
 
   // Enregistrement des outils
-  // --- CORRECTION: Utilisation de `any` pour contourner l'incompatibilité de type complexe ---
-  // TypeScript a du mal à unifier les différents schémas Zod des outils dans un seul type.
-  // Le cast vers 'any' lui indique de ne pas s'inquiéter de ce type complexe lors de l'appel.
-  toolsToRegister.forEach((tool) => server.addTool(tool as any));
+  toolsToRegister.forEach((tool) => server.addTool(tool));
 
   logger.info({ tools: toolsToRegister.map((t) => t.name) }, 'Outils enregistrés avec succès.');
 
