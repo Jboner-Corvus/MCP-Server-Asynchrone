@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import type { IncomingMessage } from 'http';
 
 import { FastMCP } from 'fastmcp';
-import type { FastMCPSession, LoggingLevel } from 'fastmcp';
+import type { FastMCPSession, LoggingLevel, Tool } from 'fastmcp';
 
 // Imports locaux
 import { config } from './config.js';
@@ -95,7 +95,7 @@ export async function applicationEntryPoint() {
     },
   });
 
-  const toolsToRegister: any[] = [debugContextTool, longProcessTool, synchronousExampleTool];
+  const toolsToRegister: Tool[] = [debugContextTool, longProcessTool, synchronousExampleTool];
 
   // Enregistrement des outils
   toolsToRegister.forEach((tool) => server.addTool(tool));
