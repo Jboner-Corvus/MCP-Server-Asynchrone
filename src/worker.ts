@@ -31,7 +31,7 @@ const processors: Record<string, JobProcFn> = {
   >,
 };
 
-import type { PinoLogger } from 'pino';
+import type { Logger as PinoLogger } from 'pino';
 import type { Config } from './config.js';
 
 export async function initWorker(logger: PinoLogger, config: Config) {

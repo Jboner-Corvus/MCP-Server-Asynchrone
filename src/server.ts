@@ -95,7 +95,7 @@ export async function applicationEntryPoint() {
     },
   });
 
-  const toolsToRegister = [debugContextTool, longProcessTool, synchronousExampleTool];
+  const toolsToRegister: any[] = [debugContextTool, longProcessTool, synchronousExampleTool];
 
   // Enregistrement des outils
   toolsToRegister.forEach((tool) => server.addTool(tool));

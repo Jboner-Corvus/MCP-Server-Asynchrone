@@ -1,6 +1,6 @@
 // --- src/types.ts (Corrigé et Isolé) ---
 import { IncomingMessage } from 'http';
-import { FastMCPSession as BaseFastMCPSession } from 'fastmcp';
+import { FastMCPSession as BaseFastMCPSession, Tool, Context as ToolContext } from 'fastmcp';
 
 /**
  * Données d'authentification personnalisées.
@@ -51,3 +51,5 @@ export function isAppRuntimeSession(session: unknown): session is AppRuntimeSess
   }
   return true;
 }
+
+export type { Tool, ToolContext };

@@ -3,7 +3,7 @@ import { longProcessTool } from './longProcess.tool.js';
 import { synchronousExampleTool } from './synchronousExample.tool.js';
 import type { ToolContext } from '../types.js';
 
-export type ToolProcessor = (params: unknown, context: ToolContext) => Promise<unknown>;
+export type ToolProcessor = (...args: any[]) => Promise<unknown>;
 
 export const toolProcessors: Record<string, ToolProcessor> = {
   [debugContextTool.name]: debugContextTool.execute,

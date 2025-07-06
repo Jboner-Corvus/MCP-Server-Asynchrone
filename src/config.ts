@@ -39,6 +39,8 @@ const envSchema = z.object({
   // Les variables FASTMCP_SOURCE et FASTMCP_REMOTE_VERSION ont été retirées.
 });
 
+export type Config = z.infer<typeof envSchema>;
+
 const parsedEnv = envSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
