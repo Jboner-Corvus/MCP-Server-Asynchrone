@@ -22,6 +22,7 @@ export default [
       '.env.local',
       // Ensure the problematic nested path is ignored if it somehow persists temporarily
       'src/utils/src/utils/',
+      'eslint.config.js', // Ignore eslint config file from linting itself with TS rules
     ],
   },
 

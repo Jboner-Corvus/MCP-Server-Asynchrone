@@ -35,7 +35,9 @@ export function initQueues(
   });
 
   const taskQueueEvents = new QueueEvents(TASK_QUEUE_NAME, { connection: redisConnection });
-  const deadLetterQueueEvents = new QueueEvents(DEAD_LETTER_QUEUE_NAME, { connection: redisConnection });
+  const deadLetterQueueEvents = new QueueEvents(DEAD_LETTER_QUEUE_NAME, {
+    connection: redisConnection,
+  });
 
   taskQueueEvents.on('error', (err: Error) =>
     logger.error({ err, queue: TASK_QUEUE_NAME }, "Erreur de la file d'attente principale")

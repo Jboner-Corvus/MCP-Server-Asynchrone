@@ -1,7 +1,5 @@
 // src/worker.ts
 
-
-
 import { initQueues, AsyncTaskJobPayload, AppJob } from './queue.js';
 import {
   doWorkSpecific as longProcDoWork,
@@ -33,11 +31,13 @@ const processors: Record<string, JobProcFn> = {
   >,
 };
 
-export async function initWorker(logger: any, config: any) {
+import type { PinoLogger } from 'pino';
+import type { Config } from './config.js';
+
+export async function initWorker(logger: PinoLogger, config: Config) {
   const { Worker } = await import('bullmq');
   const workerLog = logger.child({ proc: 'worker', queue: Q_NAME });
   const { taskQueue, deadLetterQueue, redisConnection } = initQueues(config, logger);
-  
 
   const worker = new Worker<AsyncTaskJobPayload, unknown, string>(
     Q_NAME,
@@ -49,7 +49,10 @@ export async function initWorker(logger: any, config: any) {
         tool: toolName,
         attempt: job.attemptsMade,
       });
-      jobLog.info({ paramsPreview: JSON.stringify(params)?.substring(0, 100) }, `Traitement du job`);
+      jobLog.info(
+        { paramsPreview: JSON.stringify(params)?.substring(0, 100) },
+        `Traitement du job`
+      );
 
       const processor = processors[toolName];
       if (!processor) {
@@ -147,7 +150,10 @@ export async function initWorker(logger: any, config: any) {
               removeOnFail: false,
             }
           );
-          workerLog.info({ ...logPayload, dlq: DEAD_LETTER_QUEUE_NAME }, `Job déplacé vers la DLQ.`);
+          workerLog.info(
+            { ...logPayload, dlq: DEAD_LETTER_QUEUE_NAME },
+            `Job déplacé vers la DLQ.`
+          );
         } catch (dlqError: unknown) {
           workerLog.error(
             { ...logPayload, dlqError: getErrDetails(dlqError) },

@@ -107,8 +107,6 @@ describe('initQueues', () => {
   });
 
   it('should register error event listeners for both queues', () => {
-    const { taskQueue, deadLetterQueue } = initQueues(config, logger);
-
     const { taskQueueEvents, deadLetterQueueEvents } = initQueues(config, logger);
 
     expect(taskQueueEvents.on).toHaveBeenCalledWith('error', expect.any(Function));
