@@ -11,8 +11,10 @@ import { WEBHOOK_SECRET_ENV_VAR, DEFAULT_HEALTH_CHECK_OPTIONS } from './utils/co
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Charger les variables d'environnement depuis le fichier .env à la racine du projet
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+// Charger les variables d'environnement depuis le fichier .env à la racine du projet, sauf en mode test
+if (process.env.NODE_ENV !== 'test') {
+  dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
