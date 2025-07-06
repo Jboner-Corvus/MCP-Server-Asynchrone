@@ -7,7 +7,7 @@ import { UserError, type Context } from 'fastmcp';
 import logger from '../logger.js';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
 import { isValidHttpUrl } from '../utils/validationUtils.js';
-import { AuthData, zodToStandardSchema } from '../types.js';
+import { AuthData } from '../types.js';
 
 const TOOL_NAME = 'asynchronousTaskSimulatorEnhanced';
 
@@ -64,11 +64,10 @@ export async function doWorkSpecific(
 export const longProcessTool = {
   name: TOOL_NAME,
   description: 'Simulateur de tâche longue asynchrone.',
-  parameters: zodToStandardSchema(longProcessParams),
+  parameters: longProcessParams,
   annotations: { streamingHint: true },
   execute: async (args: unknown, context: Context<AuthData>): Promise<string> => {
     const typedArgs = args as LongProcessParamsType;
-    // CORRIGÉ : `context.session` contient directement les données d'authentification.
     const authData = context.session;
     const taskId = randomUUID();
     const toolLogger = context.log;
@@ -78,10 +77,8 @@ export const longProcessTool = {
       tool: TOOL_NAME,
       taskId,
     });
-
     serverLog.info({ params: typedArgs }, `Requête de tâche asynchrone reçue.`);
     toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, { args: typedArgs });
-
     if (!authData) {
       throw new UserError("Données d'authentification manquantes.");
     }
@@ -92,9 +89,6 @@ export const longProcessTool = {
       throw new UserError("Format de l'URL de rappel invalide.");
     }
 
-    // CORRIGÉ: La vérification `if (context.streamContent && ...)` est redondante
-    // car les fonctions sont définies dans le type `Context`. On peut les appeler directement.
-
     const jobId = await enqueueTask<LongProcessParamsType>({
       params: typedArgs,
       auth: authData,
@@ -102,7 +96,6 @@ export const longProcessTool = {
       toolName: TOOL_NAME,
       cbUrl: typedArgs.callbackUrl,
     });
-
     let response = `Tâche "${TOOL_NAME}" (ID: ${jobId || taskId}) mise en file d'attente.`;
     if (typedArgs.callbackUrl) {
       response += ` Une notification sera envoyée à ${typedArgs.callbackUrl}.`;

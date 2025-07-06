@@ -5,7 +5,7 @@
  * et démarre le transport HTTP Stream en suivant les meilleures pratiques.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID, timingSafeEqual } from 'crypto';
 import type { IncomingMessage } from 'http';
 
 import { FastMCP } from 'fastmcp';
@@ -17,7 +17,6 @@ import logger from './logger.js';
 import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
-
 import type { AuthData } from './types.js';
 import { ANSI_COLORS } from './utils/constants.js';
 import { getErrDetails } from './utils/errorUtils.js';
@@ -36,7 +35,6 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
     clientIp,
     op: 'auth',
   });
-
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -48,10 +46,20 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   }
 
   const token = authHeader.substring(7);
-  if (token !== config.AUTH_TOKEN) {
+  const expectedToken = config.AUTH_TOKEN;
+
+  // --- CORRECTION DE SÉCURITÉ : Comparaison en temps constant ---
+  const tokenBuffer = Buffer.from(token, 'utf-8');
+  const expectedTokenBuffer = Buffer.from(expectedToken, 'utf-8');
+
+  if (
+    tokenBuffer.length !== expectedTokenBuffer.length ||
+    !timingSafeEqual(tokenBuffer, expectedTokenBuffer)
+  ) {
     authLog.warn("Tentative d'accès non autorisé: Jeton invalide.");
     throw new Error('Jeton invalide');
   }
+  // --- Fin de la correction de sécurité ---
 
   const sessionAuthData: AuthData = {
     id: randomUUID(),
@@ -60,7 +68,6 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
     clientIp,
     '~standard': { parameters: {}, context: {} },
   };
-
   authLog.info({ authId: sessionAuthData.id }, 'Authentification réussie.');
   return sessionAuthData;
 };
@@ -69,10 +76,7 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
 // POINT D'ENTRÉE PRINCIPAL DE L'APPLICATION
 // =============================================================================
 export async function applicationEntryPoint() {
-  logger.info(
-    `Démarrage du serveur en mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET}...`
-  );
-
+  logger.info(`Démarrage du serveur en mode ${config.NODE_ENV}...`);
   const server = new FastMCP<AuthData>({
     name: 'MCP-Server-Production',
     version: '2.0.0',
@@ -96,7 +100,6 @@ export async function applicationEntryPoint() {
       enabled: false,
     },
   });
-
   // Enregistrement des outils
   server.addTool(debugContextTool);
   server.addTool(longProcessTool);
@@ -106,15 +109,12 @@ export async function applicationEntryPoint() {
     { tools: [debugContextTool, longProcessTool, synchronousExampleTool].map((t) => t.name) },
     'Outils enregistrés avec succès.'
   );
-
   server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
     logger.info('Nouvelle session client établie.');
   });
-
   server.on('disconnect', (event: { session: FastMCPSession<AuthData>; reason?: string }) => {
     logger.warn({ reason: event.reason || 'Non spécifiée' }, 'Session client déconnectée.');
   });
-
   try {
     await server.start({
       transportType: 'httpStream',
@@ -155,9 +155,9 @@ process.on('uncaughtException', (err, origin) => {
     process.exit(1);
   }
 });
-
 process.on('unhandledRejection', (reason) => {
   logger.error({ reason: getErrDetails(reason) }, 'REJET DE PROMESSE NON GÉRÉ.');
 });
 
 // Lancement de l'application
+applicationEntryPoint();

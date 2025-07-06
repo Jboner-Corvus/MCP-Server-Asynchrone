@@ -3,10 +3,9 @@
 import { z as zod } from 'zod';
 import type { Context, SerializableValue, TextContent } from 'fastmcp';
 import loggerInstance from '../logger.js';
-import { AuthData as AuthDataType, zodToStandardSchema } from '../types.js';
+import type { AuthData as AuthDataType } from '../types.js';
 
 const SYNC_TOOL_NAME = 'synchronousExampleToolEnhanced';
-
 export const synchronousExampleParams = zod.object({
   data: zod.string().min(1).describe('La donnée à transmuter.'),
   delayMs: zod.number().int().min(0).max(1000).optional().default(10),
@@ -27,10 +26,9 @@ type SyncOutputTypeInternal = {
 export const synchronousExampleTool = {
   name: SYNC_TOOL_NAME,
   description: "Exemple d'outil synchrone.",
-  parameters: zodToStandardSchema(synchronousExampleParams),
+  parameters: synchronousExampleParams,
   execute: async (args: unknown, context: Context<AuthDataType>): Promise<SyncResultType> => {
     const typedArgs = args as SyncParamsType;
-    // CORRIGÉ : `context.session` contient directement les données d'authentification.
     const authData = context.session;
     const clientLog = context.log;
     const serverLog = loggerInstance.child({
@@ -39,7 +37,6 @@ export const synchronousExampleTool = {
       appAuthId: authData?.id,
       n8nSessionIdTool: typedArgs.userId,
     });
-
     const logFnInfo = (message: string, data?: Record<string, SerializableValue>) => {
       if (typedArgs.useClientLogger && clientLog) {
         clientLog.info(message, data);
@@ -61,12 +58,10 @@ export const synchronousExampleTool = {
       clientIp: authData?.clientIp,
       n8nSessionId: typedArgs.userId,
     };
-
     const result: SyncResultType = {
       type: 'text',
       text: JSON.stringify(output, null, 2),
     };
-
     logFnInfo(`Tâche synchrone terminée.`, { output });
     return result;
   },

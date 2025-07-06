@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import type { Context, SerializableValue } from 'fastmcp';
 import logger from '../logger.js';
-import { AuthData, zodToStandardSchema } from '../types.js';
+import { AuthData } from '../types.js';
 
 const TOOL_NAME = 'correctDebugContextTool';
 
@@ -12,13 +12,12 @@ export const debugContextParams = z.object({
   useClientLogger: z.boolean().optional().default(false),
   userId: z.string().optional(),
 });
-
 export type ParamsType = z.infer<typeof debugContextParams>;
 
 export const debugContextTool = {
   name: TOOL_NAME,
   description: "Affiche le contexte d'authentification et de session.",
-  parameters: zodToStandardSchema(debugContextParams),
+  parameters: debugContextParams,
   execute: async (args: unknown, context: Context<AuthData>): Promise<string> => {
     const typedArgs = args as ParamsType;
     const authData = context.session;
@@ -29,7 +28,6 @@ export const debugContextTool = {
       clientIp: authData?.clientIp,
       appAuthId: authData?.id,
     });
-
     const logFn = (message: string, data?: Record<string, SerializableValue>) => {
       if (typedArgs.useClientLogger && clientLog) {
         clientLog.info(message, data);
@@ -37,10 +35,8 @@ export const debugContextTool = {
         serverLog.info(data, message);
       }
     };
-
     let resultMessage = `Rapport de l'Outil de Débogage de Contexte:\n`;
     resultMessage += `UserID (n8n, depuis argument): ${typedArgs.userId || 'Non Fourni'}\n`;
-
     resultMessage += `\n--- Données d'Authentification (context.session) ---\n`;
     if (authData) {
       resultMessage += `Objet context.session présent.\n`;
@@ -48,9 +44,6 @@ export const debugContextTool = {
       resultMessage += `  Type d'Auth: ${authData.type}\n`;
       resultMessage += `  IP Client: ${authData.clientIp}\n`;
       resultMessage += `  Timestamp: ${new Date(authData.authenticatedAt).toISOString()}\n`;
-
-      // CORRECTION: Créer un objet plat et explicitement sérialisable pour le logging
-      // afin de satisfaire le type `SerializableValue`.
       const loggableAuthData = {
         id: authData.id,
         type: authData.type,
