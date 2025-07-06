@@ -1,10 +1,15 @@
 // --- src/types.ts (Corrigé et Isolé) ---
 import { IncomingMessage } from 'http';
-import { FastMCPSession as BaseFastMCPSession, Context as ToolContext, Tool as FastMCPTool } from 'fastmcp';
+import {
+  FastMCPSession as BaseFastMCPSession,
+  Context as ToolContext,
+  Tool as FastMCPTool,
+} from 'fastmcp';
 import { z } from 'zod';
-import { StandardSchemaV1 } from '@standard-schema/spec';
 
-export interface FastMCPSessionAuth extends Record<string, unknown> { "~standard"?: unknown; }
+export interface FastMCPSessionAuth extends Record<string, unknown> {
+  '~standard'?: unknown;
+}
 
 /**
  * Données d'authentification personnalisées.
@@ -55,21 +60,35 @@ export function isAppRuntimeSession(session: unknown): session is AppRuntimeSess
 }
 
 // Define the generic types for Tool
-export type Tool<T extends FastMCPSessionAuth, Params extends StandardSchemaV1> = FastMCPTool<T, Params>;
+export type Tool<T extends FastMCPSessionAuth, Params extends z.ZodTypeAny> = FastMCPTool<
+  T,
+  Params
+>;
 
 export type { ToolContext };
 
-export function zodToStandardSchema<T extends z.ZodTypeAny>(zodSchema: T): StandardSchemaV1<z.infer<T>, z.infer<T>> {
+export function zodToStandardSchema<T extends z.ZodTypeAny>(
+  zodSchema: T
+): {
+  '~standard': {
+    version: 1;
+    vendor: string;
+    validate: (
+      value: unknown
+    ) => { value: z.infer<T>; issues?: undefined } | { issues: { message: string }[] };
+    types: { input: z.infer<T>; output: z.infer<T> };
+  };
+} {
   return {
-    "~standard": {
+    '~standard': {
       version: 1,
-      vendor: "zod",
+      vendor: 'zod',
       validate: (value: unknown) => {
         const result = zodSchema.safeParse(value);
         if (result.success) {
           return { value: result.data };
         } else {
-          return { issues: result.error.issues.map(issue => ({ message: issue.message })) };
+          return { issues: result.error.issues.map((issue) => ({ message: issue.message })) };
         }
       },
       types: {

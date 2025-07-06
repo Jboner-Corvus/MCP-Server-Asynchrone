@@ -10,9 +10,6 @@ import type { IncomingMessage } from 'http';
 
 import { FastMCP } from 'fastmcp';
 import type { FastMCPSession, LoggingLevel } from 'fastmcp';
-import type { Tool } from './types.js';
-import { z } from 'zod';
-import { StandardSchemaV1 } from '@standard-schema/spec';
 
 // Imports locaux
 import { config } from './config.js';
@@ -20,6 +17,7 @@ import logger from './logger.js';
 import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
+
 import type { AuthData } from './types.js';
 import { ANSI_COLORS } from './utils/constants.js';
 import { getErrDetails } from './utils/errorUtils.js';
@@ -60,7 +58,7 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
     type: 'Bearer',
     authenticatedAt: Date.now(),
     clientIp,
-    "~standard": { parameters: {}, context: {} },
+    '~standard': { parameters: {}, context: {} },
   };
 
   authLog.info({ authId: sessionAuthData.id }, 'Authentification réussie.');
@@ -104,7 +102,10 @@ export async function applicationEntryPoint() {
   server.addTool(longProcessTool);
   server.addTool(synchronousExampleTool);
 
-  logger.info({ tools: [debugContextTool, longProcessTool, synchronousExampleTool].map((t) => t.name) }, 'Outils enregistrés avec succès.');
+  logger.info(
+    { tools: [debugContextTool, longProcessTool, synchronousExampleTool].map((t) => t.name) },
+    'Outils enregistrés avec succès.'
+  );
 
   server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
     logger.info('Nouvelle session client établie.');

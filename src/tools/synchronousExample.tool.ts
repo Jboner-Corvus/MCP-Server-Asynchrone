@@ -28,10 +28,7 @@ export const synchronousExampleTool = {
   name: SYNC_TOOL_NAME,
   description: "Exemple d'outil synchrone.",
   parameters: zodToStandardSchema(synchronousExampleParams),
-  execute: async (
-    args: unknown,
-    context: Context<AuthDataType>
-  ): Promise<SyncResultType> => {
+  execute: async (args: unknown, context: Context<AuthDataType>): Promise<SyncResultType> => {
     const typedArgs = args as SyncParamsType;
     // CORRIGÉ : `context.session` contient directement les données d'authentification.
     const authData = context.session;
