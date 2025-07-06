@@ -104,7 +104,11 @@ export default [
       // tsconfigRootDir: import.meta.dirname,
       // },
       globals: {
+        ...globals.vitest,
+        ...globals.node,
         ...globals.jest,
+        NodeJS: true, // Explicitly define NodeJS as a global
+        vi: true, // Explicitly define vi as a global for Vitest
       },
     },
     rules: {

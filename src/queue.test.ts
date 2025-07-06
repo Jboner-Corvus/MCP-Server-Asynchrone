@@ -6,7 +6,16 @@ import logger from './logger';
 import * as constants from './utils/constants';
 
 // Mock dependencies
-vi.mock('bullmq');
+vi.mock('bullmq', async (importOriginal) => {
+  const original = await importOriginal();
+  return {
+    ...original,
+    Queue: vi.fn(),
+    QueueEvents: vi.fn(() => ({
+      on: vi.fn(),
+    })),
+  };
+});
 vi.mock('./config.js');
 vi.mock('./logger.js');
 vi.mock('./utils/constants.js', async (importOriginal) => {
@@ -23,7 +32,11 @@ vi.mock('./utils/constants.js', async (importOriginal) => {
 });
 
 describe('initQueues', () => {
-  let mockLoggerChild: any;
+  let mockLoggerChild: {
+    info: ReturnType<typeof vi.fn>;
+    warn: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -49,12 +62,12 @@ describe('initQueues', () => {
         name,
         opts,
         events: { on: vi.fn() },
-      } as any;
+      };
     });
   });
 
   it('should initialize task and dead letter queues with correct parameters', () => {
-    const { taskQueue, deadLetterQueue, redisConnection } = initQueues(config, logger);
+    const { redisConnection } = initQueues(config, logger);
 
     expect(Queue).toHaveBeenCalledTimes(2);
     expect(Queue).toHaveBeenCalledWith(
@@ -96,21 +109,19 @@ describe('initQueues', () => {
   it('should register error event listeners for both queues', () => {
     const { taskQueue, deadLetterQueue } = initQueues(config, logger);
 
-    expect(taskQueue.events.on).toHaveBeenCalledWith(
-      'error',
-      expect.any(Function)
-    );
-    expect(deadLetterQueue.events.on).toHaveBeenCalledWith(
-      'error',
-      expect.any(Function)
-    );
+    const { taskQueueEvents, deadLetterQueueEvents } = initQueues(config, logger);
+
+    expect(taskQueueEvents.on).toHaveBeenCalledWith('error', expect.any(Function));
+    expect(deadLetterQueueEvents.on).toHaveBeenCalledWith('error', expect.any(Function));
   });
 
   it('should log initialization messages', () => {
     initQueues(config, logger);
 
     expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining("File d'attente 'mock-task-queue-name' initialisée pour mock-redis-host:6379")
+      expect.stringContaining(
+        "File d'attente 'mock-task-queue-name' initialisée pour mock-redis-host:6379"
+      )
     );
     expect(logger.info).toHaveBeenCalledWith(
       expect.stringContaining("Dead Letter Queue 'mock-dlq-name' initialisée.")

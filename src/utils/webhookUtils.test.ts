@@ -1,4 +1,3 @@
-
 import { expect, test, vi } from 'vitest';
 import crypto from 'crypto';
 import { sendWebhook, verifyWebhookSignature } from './webhookUtils';
@@ -15,7 +14,13 @@ global.fetch = vi.fn(() =>
 );
 
 test('sendWebhook should send a webhook', async () => {
-  const payload = { taskId: '123', status: 'completed', msg: 'done', inParams: {}, ts: new Date().toISOString() };
+  const payload = {
+    taskId: '123',
+    status: 'completed',
+    msg: 'done',
+    inParams: {},
+    ts: new Date().toISOString(),
+  };
   await sendWebhook('http://example.com', payload, '123', 'test-tool');
   expect(fetch).toHaveBeenCalled();
 });
@@ -23,7 +28,7 @@ test('sendWebhook should send a webhook', async () => {
 test('verifyWebhookSignature should verify a real signature', () => {
   const payload = { data: 'test' };
   const secret = config.WEBHOOK_SECRET;
-  
+
   // Generate a real signature
   const hmac = crypto.createHmac('sha256', secret);
   hmac.update(JSON.stringify(payload));

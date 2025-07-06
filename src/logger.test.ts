@@ -1,4 +1,3 @@
-
 import { expect, test, vi } from 'vitest';
 import logger from './logger';
 

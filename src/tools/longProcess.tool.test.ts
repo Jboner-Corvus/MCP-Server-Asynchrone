@@ -1,5 +1,4 @@
-
-import { expect, test, vi } from 'vitest';
+import { expect, test } from 'vitest';
 import { longProcessTool, doWorkSpecific } from './longProcess.tool';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
 import { createMockContext } from './testUtils';
@@ -21,7 +20,7 @@ test('longProcessTool should enqueue a task', async () => {
     streamIntervals: 3,
     userId: 'test-user',
   };
-  await longProcessTool.execute(args, mockContext as any);
+  await longProcessTool.execute(args, mockContext);
   expect(enqueueTask).toHaveBeenCalled();
 });
 
@@ -36,6 +35,6 @@ test('doWorkSpecific should return the sum of two numbers', async () => {
     streamIntervals: 3,
     userId: 'test-user',
   };
-  const result = await doWorkSpecific(params, mockContext.session as any, 'test-task-id');
+  const result = await doWorkSpecific(params, mockContext.session, 'test-task-id');
   expect(result.calcRes).toBe(15);
 });

@@ -8,8 +8,8 @@
 import { randomUUID } from 'crypto';
 import type { IncomingMessage } from 'http';
 
-import { FastMCP, UserError } from 'fastmcp';
-import type { FastMCPSession, LoggingLevel, Tool } from 'fastmcp';
+import { FastMCP } from 'fastmcp';
+import type { FastMCPSession, LoggingLevel } from 'fastmcp';
 
 // Imports locaux
 import { config } from './config.js';
@@ -39,7 +39,10 @@ export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    authLog.warn({ clientIp }, "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
+    authLog.warn(
+      { clientIp },
+      "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide."
+    );
     throw new Error('Accès non autorisé');
   }
 
@@ -99,21 +102,15 @@ export async function applicationEntryPoint() {
   // TypeScript a du mal à unifier les différents schémas Zod des outils dans un seul type.
   // Le cast vers 'any' lui indique de ne pas s'inquiéter de ce type complexe lors de l'appel.
   toolsToRegister.forEach((tool) => server.addTool(tool as any));
-  
-  logger.info(
-    { tools: toolsToRegister.map((t) => t.name) },
-    'Outils enregistrés avec succès.'
-  );
 
-  server.on('connect', (event: { session: FastMCPSession<AuthData> }) => {
+  logger.info({ tools: toolsToRegister.map((t) => t.name) }, 'Outils enregistrés avec succès.');
+
+  server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
     logger.info('Nouvelle session client établie.');
   });
 
   server.on('disconnect', (event: { session: FastMCPSession<AuthData>; reason?: string }) => {
-    logger.warn(
-      { reason: event.reason || 'Non spécifiée' },
-      'Session client déconnectée.'
-    );
+    logger.warn({ reason: event.reason || 'Non spécifiée' }, 'Session client déconnectée.');
   });
 
   try {
@@ -124,14 +121,9 @@ export async function applicationEntryPoint() {
         endpoint: '/mcp', // Maintenir le endpoint standard
       },
     });
-    logger.info(
-      `🚀 Serveur FastMCP démarré et à l'écoute sur http://localhost:${config.PORT}/mcp`
-    );
+    logger.info(`🚀 Serveur FastMCP démarré et à l'écoute sur http://localhost:${config.PORT}/mcp`);
   } catch (error) {
-    logger.fatal(
-      { err: getErrDetails(error) },
-      'Échec critique lors du démarrage du serveur.'
-    );
+    logger.fatal({ err: getErrDetails(error) }, 'Échec critique lors du démarrage du serveur.');
     process.exit(1);
   }
 
@@ -167,4 +159,3 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Lancement de l'application
-

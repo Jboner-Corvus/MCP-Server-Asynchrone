@@ -1,9 +1,12 @@
 // src/utils/asyncToolHelper.ts
 import logger from '../logger.js';
-import { taskQueue, AsyncTaskJobPayload } from '../queue.js';
+import { initQueues, AsyncTaskJobPayload } from '../queue.js';
+import { config } from '../config.js';
 import { EnqueueTaskError, getErrDetails, ErrorDetails } from './errorUtils.js';
 
 import type { AuthData } from '../types.js';
+
+const { taskQueue } = initQueues(config, logger);
 
 export interface EnqueueParams<TParams> {
   params: TParams;

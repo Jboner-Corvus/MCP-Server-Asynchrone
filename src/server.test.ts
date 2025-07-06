@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { IncomingMessage } from 'http';
 
 // Mock logger at the very top
 vi.mock('./logger.js');
@@ -28,24 +29,28 @@ vi.mock('crypto', () => ({
 }));
 
 describe('Server Tests', () => {
-  let mockFastMCPInstance: any;
+  let mockFastMCPInstance: {
+    on: ReturnType<typeof vi.fn>;
+    addTool: ReturnType<typeof vi.fn>;
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+  };
   let sigtermHandler: (() => Promise<void>) | undefined;
-  let mockProcessOn: any;
-  let mockProcessExit: any;
+  let mockProcessExit: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Mock process events
-    mockProcessOn = vi.spyOn(process, 'on').mockImplementation(((event: string, handler: any) => {
+    vi.spyOn(process, 'on').mockImplementation((event: string, handler: NodeJS.SignalsListener) => {
       if (event === 'SIGTERM') {
-        sigtermHandler = handler;
+        sigtermHandler = handler as () => Promise<void>;
       }
       return process;
-    }) as any);
-    mockProcessExit = vi.spyOn(process, 'exit').mockImplementation((() => {
+    });
+    mockProcessExit = vi.spyOn(process, 'exit').mockImplementation(() => {
       // Do nothing
-    }) as any);
+    });
 
     // Configure logger mock
     loggerMock.child.mockReturnValue(loggerMock);
@@ -73,18 +78,24 @@ describe('Server Tests', () => {
 
   describe('authHandler', () => {
     it('should authenticate successfully', async () => {
-      const req = { headers: { authorization: 'Bearer test-token' }, socket: { remoteAddress: '127.0.0.1' } };
-      const authData = await authHandler(req as any);
+      const req = {
+        headers: { authorization: 'Bearer test-token' },
+        socket: { remoteAddress: '127.0.0.1' },
+      };
+      const authData = await authHandler(req as IncomingMessage);
       expect(authData).toBeDefined();
-      expect(loggerMock.info).toHaveBeenCalledWith({ authId: 'mock-uuid' }, 'Authentification réussie.');
+      expect(loggerMock.info).toHaveBeenCalledWith(
+        { authId: 'mock-uuid' },
+        'Authentification réussie.'
+      );
     });
 
     it('should fail for missing auth header', async () => {
       const req = { headers: {}, socket: { remoteAddress: '127.0.0.1' } };
-      await expect(authHandler(req as any)).rejects.toThrow('Accès non autorisé');
+      await expect(authHandler(req as IncomingMessage)).rejects.toThrow('Accès non autorisé');
       expect(loggerMock.warn).toHaveBeenCalledWith(
         { clientIp: '127.0.0.1' },
-        "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.",
+        "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide."
       );
     });
   });
@@ -97,9 +108,9 @@ describe('Server Tests', () => {
 
     it('should handle startup failure', async () => {
       mockFastMCPInstance.start.mockRejectedValue(new Error('Startup failed'));
-      mockProcessExit.mockImplementationOnce((() => {
+      mockProcessExit.mockImplementationOnce(() => {
         throw new Error('process.exit');
-      }) as any);
+      });
       await expect(applicationEntryPoint()).rejects.toThrow('process.exit');
       expect(loggerMock.fatal).toHaveBeenCalled();
     });
@@ -111,9 +122,9 @@ describe('Server Tests', () => {
       if (!sigtermHandler) throw new Error('sigtermHandler not defined');
 
       mockFastMCPInstance.stop.mockResolvedValue(undefined);
-      mockProcessExit.mockImplementationOnce((() => {
+      mockProcessExit.mockImplementationOnce(() => {
         throw new Error('process.exit');
-      }) as any);
+      });
 
       await expect(sigtermHandler()).rejects.toThrow('process.exit');
       expect(mockFastMCPInstance.stop).toHaveBeenCalled();

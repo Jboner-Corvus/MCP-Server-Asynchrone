@@ -1,4 +1,3 @@
-
 import { expect, test } from 'vitest';
 import { isAppRuntimeSession } from './types';
 import { IncomingMessage } from 'http';
@@ -6,7 +5,7 @@ import { IncomingMessage } from 'http';
 test('isAppRuntimeSession returns true for valid session object', () => {
   const validSession = {
     frameworkSessionId: 'test-id',
-    request: new IncomingMessage(null as any),
+    request: new IncomingMessage(null),
     sendEvent: () => {},
     closeConnection: () => {},
     auth: {
@@ -22,7 +21,7 @@ test('isAppRuntimeSession returns true for valid session object', () => {
 test('isAppRuntimeSession returns false for invalid session object', () => {
   const invalidSession = {
     frameworkSessionId: 'test-id',
-    request: new IncomingMessage(null as any),
+    request: new IncomingMessage(null),
     sendEvent: () => {},
     // closeConnection is missing
   };

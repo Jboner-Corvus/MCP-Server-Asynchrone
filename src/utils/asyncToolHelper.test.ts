@@ -2,11 +2,19 @@ import { expect, test, vi } from 'vitest';
 import { enqueueTask } from './asyncToolHelper';
 import { taskQueue } from '../queue.js';
 
-vi.mock('../queue.js', () => ({
-  taskQueue: {
+vi.mock('../queue.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  const mockTaskQueue = {
     add: vi.fn().mockResolvedValue({ id: 'mock-job-id' }),
-  },
-}));
+  };
+  return {
+    ...actual,
+    initQueues: vi.fn(() => ({
+      taskQueue: mockTaskQueue,
+    })),
+    taskQueue: mockTaskQueue, // Directly export taskQueue for direct import in asyncToolHelper.ts
+  };
+});
 
 test('enqueueTask should add a task to the queue', async () => {
   const mockAuthData = {
