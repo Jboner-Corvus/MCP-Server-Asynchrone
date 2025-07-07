@@ -1,10 +1,10 @@
 // Mock dependencies
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Worker } from 'bullmq';
-import * as errorUtils from './utils/errorUtils';
-import logger from './logger';
-import { config } from './config';
+import * as errorUtils from './utils/errorUtils.js';
+import logger from './logger.js';
+import { config } from './config.js';
 
 // Mock dependencies
 vi.mock('worker_threads', () => ({ isMainThread: false }));
@@ -17,6 +17,10 @@ vi.mock('./config.js', () => ({
     REDIS_PASSWORD: '',
     NODE_ENV: 'test',
     LOG_LEVEL: 'info',
+    AUTH_TOKEN: 'test-token',
+    HTTP_STREAM_ENDPOINT: '/stream',
+    HEALTH_CHECK_PATH: '/health',
+    PORT: 3000,
   },
 }));
 vi.mock('./logger.js', () => ({
@@ -81,7 +85,11 @@ describe('Worker Initialization', () => {
       on: vi.fn(),
       close: vi.fn().mockResolvedValue(undefined),
       opts: { concurrency: 5 },
-    };
+      // Add other properties that are accessed in the tests
+      // For example, if `worker.run` is called, you might need:
+      run: vi.fn(),
+      // ... and any other properties that are part of the Worker type
+    } as unknown as Worker; // Use as unknown for now to bypass strict type checking for the mock
     vi.mocked(Worker).mockImplementation(() => mockWorkerInstance);
 
     jobLogSpy = {

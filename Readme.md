@@ -102,9 +102,11 @@ L'Inspecteur MCP fournit une interface utilisateur web pour interagir avec votre
 
 1.  **Lancement** :
     Pour lancer l'inspecteur, exécutez la commande suivante :
+
     ```bash
     npx @modelcontextprotocol/inspector
     ```
+
     Cette commande démarre un serveur proxy et ouvre automatiquement l'interface client dans votre navigateur, généralement à l'adresse `http://localhost:6274`.
 
 2.  **Configuration de la Connexion** :

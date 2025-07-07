@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { isValidHttpUrl } from './validationUtils';
+import { isValidHttpUrl } from './validationUtils.js';
 
 test('isValidHttpUrl should return true for valid http URL', () => {
   expect(isValidHttpUrl('http://example.com')).toBe(true);

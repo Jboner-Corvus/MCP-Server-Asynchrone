@@ -1,5 +1,6 @@
 // --- src/types.ts (Corrigé et Isolé) ---
 import { IncomingMessage } from 'http';
+import { Socket } from 'net';
 import {
   FastMCPSession as BaseFastMCPSession,
   Context as ToolContext,
@@ -43,7 +44,10 @@ export function isAppRuntimeSession(session: unknown): session is AppRuntimeSess
     typeof s.frameworkSessionId === 'string' &&
     s.request instanceof IncomingMessage &&
     typeof s.sendEvent === 'function' &&
-    typeof s.closeConnection === 'function';
+    typeof s.closeConnection === 'function' &&
+    (s.request.socket === null ||
+      s.request.socket === undefined ||
+      (typeof Socket !== 'undefined' && s.request.socket instanceof Socket));
   if (!hasCoreProperties) return false;
 
   if (s.auth !== undefined) {

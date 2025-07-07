@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { getErrDetails, AppErrorBase, EnqueueTaskError, WebhookError } from './errorUtils';
+import { getErrDetails, AppErrorBase, EnqueueTaskError, WebhookError } from './errorUtils.js';
 
 test('getErrDetails should handle AppErrorBase', () => {
   const error = new AppErrorBase('test message', 'TestError', { detail: 'some detail' });

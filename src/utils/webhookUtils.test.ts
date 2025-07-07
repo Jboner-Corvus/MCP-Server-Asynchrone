@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest';
 import crypto from 'crypto';
-import { sendWebhook, verifyWebhookSignature } from './webhookUtils';
+import { sendWebhook, verifyWebhookSignature } from './webhookUtils.js';
 import { config } from '../config.js';
 
 vi.mock('../config.js');
@@ -16,7 +16,7 @@ global.fetch = vi.fn(() =>
 test('sendWebhook should send a webhook', async () => {
   const payload = {
     taskId: '123',
-    status: 'completed',
+    status: 'completed' as 'completed' | 'error' | 'processing',
     msg: 'done',
     inParams: {},
     ts: new Date().toISOString(),

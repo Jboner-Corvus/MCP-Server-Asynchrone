@@ -1,20 +1,21 @@
 import { expect, test, vi } from 'vitest';
-import { enqueueTask } from './asyncToolHelper';
+import { enqueueTask } from './asyncToolHelper.js';
 import { taskQueue } from '../queue.js';
 
-vi.mock('../queue.js', async (importOriginal) => {
-  const actual = await importOriginal();
-  const mockTaskQueue = {
+vi.mock('../queue.js', () => ({
+  taskQueue: {
     add: vi.fn().mockResolvedValue({ id: 'mock-job-id' }),
-  };
-  return {
-    ...actual,
-    initQueues: vi.fn(() => ({
-      taskQueue: mockTaskQueue,
+  },
+}));
+
+vi.mock('../logger.js', () => ({
+  default: {
+    child: vi.fn(() => ({
+      info: vi.fn(),
+      error: vi.fn(),
     })),
-    taskQueue: mockTaskQueue, // Directly export taskQueue for direct import in asyncToolHelper.ts
-  };
-});
+  },
+}));
 
 test('enqueueTask should add a task to the queue', async () => {
   const mockAuthData = {
@@ -45,7 +46,6 @@ test('enqueueTask should add a task to the queue', async () => {
     },
     {
       jobId: taskId,
-      // Assuming DEFAULT_BULLMQ_JOB_OPTIONS are merged here, if not, they should be mocked or included.
     }
   );
 });

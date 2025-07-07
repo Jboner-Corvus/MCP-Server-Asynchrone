@@ -1,8 +1,12 @@
-import { expect, test } from 'vitest';
-import { debugContextTool } from './debugContext.tool';
-import { createMockContext } from './testUtils';
+import { expect, vi, test } from 'vitest';
+import { debugContextTool } from './debugContext.tool.js';
+import { createMockContext } from './testUtils.js';
 
-const mockContext = createMockContext();
+const mockContext = {
+  ...createMockContext(),
+  reportProgress: vi.fn(),
+  streamContent: vi.fn(),
+};
 
 test('debugContextTool should return a string with context information', async () => {
   const result = await debugContextTool.execute({}, mockContext);

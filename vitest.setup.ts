@@ -1,17 +1,10 @@
 import { vi } from 'vitest';
 
-// Mock environment variables for tests
-process.env.NODE_ENV = 'test';
-process.env.AUTH_TOKEN = 'test-auth-token-that-is-long-enough';
-process.env.WEBHOOK_SECRET = 'test-webhook-secret-that-is-long-enough-to-pass-validation';
+// Simuler (mocker) process.exit pour empêcher les tests de s'arrêter
+vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
 
-// Global mock for process.on and process.exit
-const mockProcessOnHandlers: Record<string, Function> = {};
-vi.spyOn(process, 'on').mockImplementation((event, handler) => {
-  mockProcessOnHandlers[event as string] = handler;
-  return process; // Return process to allow chaining
-});
-vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("process.exit"); });
+// Définir les variables d'environnement requises avant que les tests ne les lisent
+process.env.AUTH_TOKEN = 'UN_TOKEN_DE_TEST_SECRET_ET_ASSEZ_LONG';
+process.env.WEBHOOK_SECRET = 'UN_SECRET_WEBHOOK_DE_TEST_TRES_TRES_LONG_POUR_PASSER_LA_VALIDATION';
 
-// Export the handlers for testing purposes
-export { mockProcessOnHandlers };
+// Vous pouvez ajouter d'autres variables nécessaires ici

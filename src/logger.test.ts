@@ -1,5 +1,5 @@
 import { expect, test, vi } from 'vitest';
-import logger from './logger';
+import logger from './logger.js';
 
 vi.mock('./config.js');
 

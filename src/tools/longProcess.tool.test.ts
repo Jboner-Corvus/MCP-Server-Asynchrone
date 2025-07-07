@@ -1,13 +1,17 @@
-import { expect, test } from 'vitest';
-import { longProcessTool, doWorkSpecific } from './longProcess.tool';
+import { expect, test, vi } from 'vitest';
+import { longProcessTool, doWorkSpecific } from './longProcess.tool.js';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
-import { createMockContext } from './testUtils';
+import { createMockContext } from './testUtils.js';
 
 vi.mock('../utils/asyncToolHelper.js', () => ({
   enqueueTask: vi.fn(),
 }));
 
-const mockContext = createMockContext();
+const mockContext = {
+  ...createMockContext(),
+  reportProgress: vi.fn(),
+  streamContent: vi.fn(),
+};
 
 test('longProcessTool should enqueue a task', async () => {
   const args = {

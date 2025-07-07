@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import * as constants from './constants';
+import * as constants from './constants.js';
 
 test('constants are defined', () => {
   expect(constants.ANSI_COLORS).toBeDefined();

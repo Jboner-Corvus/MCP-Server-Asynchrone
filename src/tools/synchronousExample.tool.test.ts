@@ -1,8 +1,12 @@
-import { expect, test } from 'vitest';
-import { synchronousExampleTool } from './synchronousExample.tool';
-import { createMockContext } from './testUtils';
+import { expect, test, vi } from 'vitest';
+import { synchronousExampleTool } from './synchronousExample.tool.js';
+import { createMockContext } from './testUtils.js';
 
-const mockContext = createMockContext();
+const mockContext = {
+  ...createMockContext(),
+  reportProgress: vi.fn(),
+  streamContent: vi.fn(),
+};
 
 test('synchronousExampleTool should return a text content object', async () => {
   const args = {

@@ -12,5 +12,11 @@ export const createMockContext = () => ({
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
+    fatal: vi.fn(),
+    trace: vi.fn(),
+    silent: vi.fn(),
+    level: 'info',
   },
+  reportProgress: vi.fn(),
+  streamContent: vi.fn(),
 });

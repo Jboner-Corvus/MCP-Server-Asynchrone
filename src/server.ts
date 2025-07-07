@@ -18,7 +18,6 @@ import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
 import type { AuthData } from './types.js';
-import { ANSI_COLORS } from './utils/constants.js';
 import { getErrDetails } from './utils/errorUtils.js';
 
 // =============================================================================
