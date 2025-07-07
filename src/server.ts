@@ -5,11 +5,11 @@
  * et démarre le transport HTTP Stream en suivant les meilleures pratiques.
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID, timingSafeEqual } from 'crypto';
 import type { IncomingMessage } from 'http';
 
-import { FastMCP, UserError } from 'fastmcp';
-import type { FastMCPSession, LoggingLevel, Tool } from 'fastmcp';
+import { FastMCP } from 'fastmcp';
+import type { FastMCPSession, LoggingLevel } from 'fastmcp';
 
 // Imports locaux
 import { config } from './config.js';
@@ -18,14 +18,13 @@ import { debugContextTool } from './tools/debugContext.tool.js';
 import { longProcessTool } from './tools/longProcess.tool.js';
 import { synchronousExampleTool } from './tools/synchronousExample.tool.js';
 import type { AuthData } from './types.js';
-import { ANSI_COLORS } from './utils/constants.js';
 import { getErrDetails } from './utils/errorUtils.js';
 
 // =============================================================================
 // GESTIONNAIRE D'AUTHENTIFICATION
 // =============================================================================
 
-const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
+export const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
   const clientIp =
     (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
     req.socket?.remoteAddress ||
@@ -35,33 +34,39 @@ const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
     clientIp,
     op: 'auth',
   });
-
   const authHeader = req.headers?.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    authLog.warn("Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide.");
-    throw new Response(JSON.stringify({ error: 'Accès non autorisé' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    authLog.warn(
+      { clientIp },
+      "Tentative d'accès non autorisé: en-tête 'Authorization' manquant ou invalide."
+    );
+    throw new Error('Accès non autorisé');
   }
 
   const token = authHeader.substring(7);
-  if (token !== config.AUTH_TOKEN) {
+  const expectedToken = config.AUTH_TOKEN;
+
+  // --- CORRECTION DE SÉCURITÉ : Comparaison en temps constant ---
+  const tokenBuffer = Buffer.from(token, 'utf-8');
+  const expectedTokenBuffer = Buffer.from(expectedToken, 'utf-8');
+
+  if (
+    tokenBuffer.length !== expectedTokenBuffer.length ||
+    !timingSafeEqual(tokenBuffer, expectedTokenBuffer)
+  ) {
     authLog.warn("Tentative d'accès non autorisé: Jeton invalide.");
-    throw new Response(JSON.stringify({ error: 'Jeton invalide' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    throw new Error('Jeton invalide');
   }
+  // --- Fin de la correction de sécurité ---
 
   const sessionAuthData: AuthData = {
     id: randomUUID(),
     type: 'Bearer',
     authenticatedAt: Date.now(),
     clientIp,
+    '~standard': { parameters: {}, context: {} },
   };
-
   authLog.info({ authId: sessionAuthData.id }, 'Authentification réussie.');
   return sessionAuthData;
 };
@@ -69,11 +74,8 @@ const authHandler = async (req: IncomingMessage): Promise<AuthData> => {
 // =============================================================================
 // POINT D'ENTRÉE PRINCIPAL DE L'APPLICATION
 // =============================================================================
-async function applicationEntryPoint() {
-  logger.info(
-    `Démarrage du serveur en mode ${ANSI_COLORS.YELLOW}${config.NODE_ENV}${ANSI_COLORS.RESET}...`
-  );
-
+export async function applicationEntryPoint() {
+  logger.info(`Démarrage du serveur en mode ${config.NODE_ENV}...`);
   const server = new FastMCP<AuthData>({
     name: 'MCP-Server-Production',
     version: '2.0.0',
@@ -97,31 +99,21 @@ async function applicationEntryPoint() {
       enabled: false,
     },
   });
-
-  const toolsToRegister = [debugContextTool, longProcessTool, synchronousExampleTool];
-
   // Enregistrement des outils
-  // --- CORRECTION: Utilisation de `any` pour contourner l'incompatibilité de type complexe ---
-  // TypeScript a du mal à unifier les différents schémas Zod des outils dans un seul type.
-  // Le cast vers 'any' lui indique de ne pas s'inquiéter de ce type complexe lors de l'appel.
-  toolsToRegister.forEach((tool) => server.addTool(tool as any));
-  
+  server.addTool(debugContextTool);
+  server.addTool(longProcessTool);
+  server.addTool(synchronousExampleTool);
+
   logger.info(
-    { tools: toolsToRegister.map((t) => t.name) },
+    { tools: [debugContextTool, longProcessTool, synchronousExampleTool].map((t) => t.name) },
     'Outils enregistrés avec succès.'
   );
-
-  server.on('connect', (event: { session: FastMCPSession<AuthData> }) => {
+  server.on('connect', (_event: { session: FastMCPSession<AuthData> }) => {
     logger.info('Nouvelle session client établie.');
   });
-
   server.on('disconnect', (event: { session: FastMCPSession<AuthData>; reason?: string }) => {
-    logger.warn(
-      { reason: event.reason || 'Non spécifiée' },
-      'Session client déconnectée.'
-    );
+    logger.warn({ reason: event.reason || 'Non spécifiée' }, 'Session client déconnectée.');
   });
-
   try {
     await server.start({
       transportType: 'httpStream',
@@ -130,14 +122,9 @@ async function applicationEntryPoint() {
         endpoint: '/mcp', // Maintenir le endpoint standard
       },
     });
-    logger.info(
-      `🚀 Serveur FastMCP démarré et à l'écoute sur http://localhost:${config.PORT}/mcp`
-    );
+    logger.info(`🚀 Serveur FastMCP démarré et à l'écoute sur http://localhost:${config.PORT}/mcp`);
   } catch (error) {
-    logger.fatal(
-      { err: getErrDetails(error) },
-      'Échec critique lors du démarrage du serveur.'
-    );
+    logger.fatal({ err: getErrDetails(error) }, 'Échec critique lors du démarrage du serveur.');
     process.exit(1);
   }
 
@@ -163,18 +150,13 @@ async function applicationEntryPoint() {
 // =============================================================================
 process.on('uncaughtException', (err, origin) => {
   logger.fatal({ err: getErrDetails(err), origin }, `EXCEPTION NON CAPTURÉE. Arrêt forcé.`);
-  process.exit(1);
+  if (config.NODE_ENV !== 'test') {
+    process.exit(1);
+  }
 });
-
 process.on('unhandledRejection', (reason) => {
   logger.error({ reason: getErrDetails(reason) }, 'REJET DE PROMESSE NON GÉRÉ.');
 });
 
 // Lancement de l'application
-applicationEntryPoint().catch((err) => {
-  logger.fatal(
-    { err: getErrDetails(err) },
-    "Erreur fatale non interceptée à la racine de l'application."
-  );
-  process.exit(1);
-});
+applicationEntryPoint();

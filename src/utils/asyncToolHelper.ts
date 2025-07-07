@@ -1,6 +1,6 @@
 // src/utils/asyncToolHelper.ts
 import logger from '../logger.js';
-import { taskQueue, AsyncTaskJobPayload } from '../queue.js';
+import { AsyncTaskJobPayload, taskQueue } from '../queue.js';
 import { EnqueueTaskError, getErrDetails, ErrorDetails } from './errorUtils.js';
 
 import type { AuthData } from '../types.js';
@@ -39,6 +39,7 @@ export async function enqueueTask<TParams>(
     cbUrl: !!cbUrl,
   });
   const jobData: AsyncTaskJobPayload<TParams> = { params, auth, taskId, toolName, cbUrl };
+
   try {
     const job = await taskQueue.add(toolName, jobData, { jobId: taskId });
     log.info({ jobId: job.id, queue: taskQueue.name }, `Tâche ajoutée à la file d'attente.`);
@@ -50,7 +51,7 @@ export async function enqueueTask<TParams>(
       "Échec de l'ajout de la tâche à la file d'attente."
     );
     throw new EnqueueTaskError(
-      `L'ajout de la tâche ${taskId} pour ${toolName} à la file d'attente a échoué : ${errDetails.message}`, // Use errDetails.message
+      `L'ajout de la tâche ${taskId} pour ${toolName} à la file d'attente a échoué : ${errDetails.message}`,
       { originalError: errDetails, toolName, taskId }
     );
   }

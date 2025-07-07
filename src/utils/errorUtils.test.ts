@@ -1,25 +1,47 @@
-// src/utils/errorUtils.test.ts
-import { getErrDetails, AppErrorBase } from './errorUtils'; // Adjust path as needed
+import { expect, test } from 'vitest';
+import { getErrDetails, AppErrorBase, EnqueueTaskError, WebhookError } from './errorUtils.js';
 
-describe('ErrorUtils', () => {
-  describe('getErrDetails', () => {
-    it('should handle a standard Error', () => {
-      const error = new Error('Test error message');
-      const details = getErrDetails(error);
-      expect(details.message).toBe('Test error message');
-      expect(details.name).toBe('Error');
-      expect(details.type).toBe('GenericError');
-    });
+test('getErrDetails should handle AppErrorBase', () => {
+  const error = new AppErrorBase('test message', 'TestError', { detail: 'some detail' });
+  const details = getErrDetails(error);
+  expect(details.message).toBe('test message');
+  expect(details.name).toBe('AppErrorBase');
+  expect(details.type).toBe('TestError');
+  expect(details.details).toEqual({ detail: 'some detail' });
+});
 
-    it('should handle an AppErrorBase', () => {
-      const error = new AppErrorBase('Custom app error', 'CustomType', { extra: 'data' });
-      const details = getErrDetails(error);
-      expect(details.message).toBe('Custom app error');
-      expect(details.name).toBe('AppErrorBase');
-      expect(details.type).toBe('CustomType');
-      expect(details.details).toEqual({ extra: 'data' });
-    });
+test('getErrDetails should handle EnqueueTaskError', () => {
+  const error = new EnqueueTaskError('enqueue failed', { taskId: '123' });
+  const details = getErrDetails(error);
+  expect(details.message).toBe('enqueue failed');
+  expect(details.name).toBe('EnqueueTaskError');
+  expect(details.type).toBe('EnqueueTaskError');
+  expect(details.details).toEqual({ taskId: '123' });
+});
 
-    // Add more tests for other cases (strings, plain objects, etc.)
+test('getErrDetails should handle WebhookError', () => {
+  const error = new WebhookError('webhook failed', 'WebhookError', 500, 'Internal Server Error', {
+    url: 'http://example.com',
   });
+  const details = getErrDetails(error);
+  expect(details.message).toBe('webhook failed');
+  expect(details.name).toBe('WebhookError');
+  expect(details.type).toBe('WebhookError');
+  expect((details.details as { url: string }).url).toBe('http://example.com');
+});
+
+test('getErrDetails should handle generic Error', () => {
+  const error = new Error('generic error');
+  const details = getErrDetails(error);
+  expect(details.message).toBe('generic error');
+  expect(details.name).toBe('Error');
+  expect(details.type).toBe('GenericError');
+});
+
+test('getErrDetails should handle unknown error', () => {
+  const error = { some: 'object' };
+  const details = getErrDetails(error);
+  expect(details.message).toBe('{"some":"object"}');
+  expect(details.name).toBe('UnknownError');
+  expect(details.type).toBe('UnknownErrorType');
 });

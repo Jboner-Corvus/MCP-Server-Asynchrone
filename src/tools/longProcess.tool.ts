@@ -7,7 +7,7 @@ import { UserError, type Context } from 'fastmcp';
 import logger from '../logger.js';
 import { enqueueTask } from '../utils/asyncToolHelper.js';
 import { isValidHttpUrl } from '../utils/validationUtils.js';
-import type { AuthData } from '../types.js';
+import { AuthData } from '../types.js';
 
 const TOOL_NAME = 'asynchronousTaskSimulatorEnhanced';
 
@@ -66,8 +66,8 @@ export const longProcessTool = {
   description: 'Simulateur de tâche longue asynchrone.',
   parameters: longProcessParams,
   annotations: { streamingHint: true },
-  execute: async (args: LongProcessParamsType, context: Context<AuthData>): Promise<string> => {
-    // CORRIGÉ : `context.session` contient directement les données d'authentification.
+  execute: async (args: unknown, context: Context<AuthData>): Promise<string> => {
+    const typedArgs = args as LongProcessParamsType;
     const authData = context.session;
     const taskId = randomUUID();
     const toolLogger = context.log;
@@ -77,34 +77,28 @@ export const longProcessTool = {
       tool: TOOL_NAME,
       taskId,
     });
-
-    serverLog.info({ params: args }, `Requête de tâche asynchrone reçue.`);
-    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, { args });
-
+    serverLog.info({ params: typedArgs }, `Requête de tâche asynchrone reçue.`);
+    toolLogger?.info(`[${taskId}] Initialisation de la tâche...`, { args: typedArgs });
     if (!authData) {
       throw new UserError("Données d'authentification manquantes.");
     }
-    if (args.failOnInit) {
+    if (typedArgs.failOnInit) {
       throw new UserError('Échec de validation initial simulé.');
     }
-    if (args.callbackUrl && !isValidHttpUrl(args.callbackUrl, `${TOOL_NAME}-execute`)) {
+    if (typedArgs.callbackUrl && !isValidHttpUrl(typedArgs.callbackUrl, `${TOOL_NAME}-execute`)) {
       throw new UserError("Format de l'URL de rappel invalide.");
     }
 
-    // CORRIGÉ: La vérification `if (context.streamContent && ...)` est redondante
-    // car les fonctions sont définies dans le type `Context`. On peut les appeler directement.
-
     const jobId = await enqueueTask<LongProcessParamsType>({
-      params: args,
+      params: typedArgs,
       auth: authData,
       taskId: taskId,
       toolName: TOOL_NAME,
-      cbUrl: args.callbackUrl,
+      cbUrl: typedArgs.callbackUrl,
     });
-
     let response = `Tâche "${TOOL_NAME}" (ID: ${jobId || taskId}) mise en file d'attente.`;
-    if (args.callbackUrl) {
-      response += ` Une notification sera envoyée à ${args.callbackUrl}.`;
+    if (typedArgs.callbackUrl) {
+      response += ` Une notification sera envoyée à ${typedArgs.callbackUrl}.`;
     }
     return response;
   },

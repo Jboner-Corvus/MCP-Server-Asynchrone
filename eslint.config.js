@@ -22,6 +22,7 @@ export default [
       '.env.local',
       // Ensure the problematic nested path is ignored if it somehow persists temporarily
       'src/utils/src/utils/',
+      'eslint.config.js', // Ignore eslint config file from linting itself with TS rules
     ],
   },
 
@@ -104,7 +105,11 @@ export default [
       // tsconfigRootDir: import.meta.dirname,
       // },
       globals: {
+        ...globals.vitest,
+        ...globals.node,
         ...globals.jest,
+        NodeJS: true, // Explicitly define NodeJS as a global
+        vi: true, // Explicitly define vi as a global for Vitest
       },
     },
     rules: {
