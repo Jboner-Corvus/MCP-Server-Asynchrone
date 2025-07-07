@@ -22,20 +22,43 @@ vi.mock('./config.js', () => ({
     PORT: 3000,
   },
 }));
-vi.mock('./logger.js', () => ({
-  default: {
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      fatal: vi.fn(),
-      debug: vi.fn(),
-      trace: vi.fn(),
-      silent: vi.fn(),
-      level: 'info',
-    })),
-  },
-}));
+vi.mock('pino', () => {
+  const mockLogFn = vi.fn();
+  const mockLogger = {
+    info: mockLogFn,
+    warn: mockLogFn,
+    error: mockLogFn,
+    fatal: mockLogFn,
+    debug: mockLogFn,
+    trace: mockLogFn,
+    silent: mockLogFn,
+    level: 'info',
+    child: vi.fn(() => mockLogger),
+  };
+  return {
+    pino: vi.fn(() => mockLogger),
+  };
+});
+
+vi.mock('./logger.js', () => {
+  const mockLogFn: import('pino').LogFn = vi.fn((obj: object | string, msg?: string, ...args: any[]) => {});
+  const mockChildLogger = {
+    info: mockLogFn,
+    warn: mockLogFn,
+    error: mockLogFn,
+    fatal: mockLogFn,
+    debug: mockLogFn,
+    trace: mockLogFn,
+    silent: mockLogFn,
+    level: 'info',
+  };
+  return {
+    default: {
+      ...mockChildLogger,
+      child: vi.fn(() => mockChildLogger),
+    } as unknown as typeof import('pino').pino,
+  };
+});
 vi.mock('./queue.js', () => ({
   initQueues: vi.fn(() => ({
     taskQueue: {
@@ -67,6 +90,11 @@ describe('Worker Initialization', () => {
     info: MockInstance;
     warn: MockInstance;
     error: MockInstance;
+    fatal: MockInstance;
+    debug: MockInstance;
+    trace: MockInstance;
+    silent: MockInstance;
+    level: string;
   };
   let sigtermHandler: (...args: unknown[]) => unknown;
   let sigintHandler: (...args: unknown[]) => unknown;
