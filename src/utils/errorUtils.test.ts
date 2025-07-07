@@ -27,7 +27,7 @@ test('getErrDetails should handle WebhookError', () => {
   expect(details.message).toBe('webhook failed');
   expect(details.name).toBe('WebhookError');
   expect(details.type).toBe('WebhookError');
-  expect(details.details.url).toBe('http://example.com');
+  expect((details.details as { url: string }).url).toBe('http://example.com');
 });
 
 test('getErrDetails should handle generic Error', () => {

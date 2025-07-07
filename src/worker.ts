@@ -37,7 +37,7 @@ import type { Config } from './config.js';
 export async function initWorker(logger: PinoLogger, config: Config) {
   const { Worker } = await import('bullmq');
   const workerLog = logger.child({ proc: 'worker', queue: Q_NAME });
-  const { taskQueue, deadLetterQueue, redisConnection } = initQueues(config, logger);
+  const { taskQueue, deadLetterQueue, redisConnection } = initQueues();
 
   const worker = new Worker<AsyncTaskJobPayload, unknown, string>(
     Q_NAME,

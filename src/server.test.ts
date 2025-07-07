@@ -53,7 +53,7 @@ describe('Server Tests', () => {
     vi.clearAllMocks();
 
     vi.spyOn(process, 'on').mockImplementation(
-      (event: string, handler: (...args: unknown[]) => void) => {
+      (event: string | symbol, handler: (...args: unknown[]) => void): NodeJS.Process => {
         if (event === 'SIGTERM') {
           sigtermHandler = handler as () => Promise<void>;
         }

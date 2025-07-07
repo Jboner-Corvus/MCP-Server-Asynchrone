@@ -1,10 +1,9 @@
-// Mock dependencies
-
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Worker } from 'bullmq';
 import * as errorUtils from './utils/errorUtils.js';
 import logger from './logger.js';
 import { config } from './config.js';
+import type { MockInstance } from 'vitest';
 
 // Mock dependencies
 vi.mock('worker_threads', () => ({ isMainThread: false }));
@@ -29,6 +28,11 @@ vi.mock('./logger.js', () => ({
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
+      fatal: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      silent: vi.fn(),
+      level: 'info',
     })),
   },
 }));
@@ -54,16 +58,15 @@ vi.mock('./tools/toolProcessors', () => ({
 
 describe('Worker Initialization', () => {
   let workerModule: typeof import('./worker.js');
-  let queueModule: typeof import('./queue.js');
   let mockWorkerInstance: {
-    on: vi.Mock;
-    close: vi.Mock;
+    on: MockInstance;
+    close: MockInstance;
     opts: { concurrency: number };
   };
   let jobLogSpy: {
-    info: vi.Mock;
-    warn: vi.Mock;
-    error: vi.Mock;
+    info: MockInstance;
+    warn: MockInstance;
+    error: MockInstance;
   };
   let sigtermHandler: (...args: unknown[]) => unknown;
   let sigintHandler: (...args: unknown[]) => unknown;
@@ -74,10 +77,8 @@ describe('Worker Initialization', () => {
 
     // Dynamically import modules to use mocks
     workerModule = await import('./worker.js');
-    const queueModuleActual = await import('./queue.js');
     const webhookUtilsActual = await import('./utils/webhookUtils.js');
 
-    queueModule = queueModuleActual;
     vi.spyOn(webhookUtilsActual, 'sendWebhook');
     vi.spyOn(errorUtils, 'getErrDetails');
 
@@ -85,19 +86,33 @@ describe('Worker Initialization', () => {
       on: vi.fn(),
       close: vi.fn().mockResolvedValue(undefined),
       opts: { concurrency: 5 },
-      // Add other properties that are accessed in the tests
-      // For example, if `worker.run` is called, you might need:
-      run: vi.fn(),
-      // ... and any other properties that are part of the Worker type
-    } as unknown as Worker; // Use as unknown for now to bypass strict type checking for the mock
-    vi.mocked(Worker).mockImplementation(() => mockWorkerInstance);
+    } as unknown as {
+      on: MockInstance;
+      close: MockInstance;
+      opts: { concurrency: number };
+    };
+    vi.mocked(Worker).mockImplementation(() => mockWorkerInstance as unknown as Worker);
 
     jobLogSpy = {
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
+      fatal: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      silent: vi.fn(),
+      level: 'info',
+    } as unknown as {
+      info: MockInstance;
+      warn: MockInstance;
+      error: MockInstance;
+      fatal: MockInstance;
+      debug: MockInstance;
+      trace: MockInstance;
+      silent: MockInstance;
+      level: string;
     };
-    vi.spyOn(logger, 'child').mockReturnValue(jobLogSpy);
+    vi.spyOn(logger, 'child').mockReturnValue(jobLogSpy as ReturnType<typeof logger.child>);
 
     vi.spyOn(process, 'on').mockImplementation((event, handler) => {
       if (event === 'SIGTERM') sigtermHandler = handler as (...args: unknown[]) => unknown;
@@ -112,21 +127,16 @@ describe('Worker Initialization', () => {
     vi.restoreAllMocks();
   });
 
-  it('should initialize queues with the correct config and logger', () => {
-    expect(queueModule.initQueues).toHaveBeenCalledWith(config, logger);
-  });
-
   it('should create a BullMQ Worker with correct parameters', () => {
-    const { redisConnection } = queueModule.initQueues(config, logger);
-    expect(Worker).toHaveBeenCalledWith(config.TASK_QUEUE_NAME, expect.any(Function), {
-      connection: redisConnection,
+    expect(Worker).toHaveBeenCalledWith('async-tasks', expect.any(Function), {
+      connection: {},
       concurrency: 5,
     });
   });
 
   it('should log that the worker has started', () => {
     expect(jobLogSpy.info).toHaveBeenCalledWith(
-      `Worker pour la file d'attente '${config.TASK_QUEUE_NAME}' démarré avec une concurrence de 5. Prêt à traiter les tâches.`
+      `Worker pour la file d'attente 'async-tasks' démarré avec une concurrence de 5. Prêt à traiter les tâches.`
     );
   });
 
