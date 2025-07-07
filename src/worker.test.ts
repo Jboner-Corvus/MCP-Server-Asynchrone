@@ -22,26 +22,10 @@ vi.mock('./config.js', () => ({
     PORT: 3000,
   },
 }));
-vi.mock('pino', () => {
-  const mockLogFn = vi.fn();
-  const mockLogger = {
-    info: mockLogFn,
-    warn: mockLogFn,
-    error: mockLogFn,
-    fatal: mockLogFn,
-    debug: mockLogFn,
-    trace: mockLogFn,
-    silent: mockLogFn,
-    level: 'info',
-    child: vi.fn(() => mockLogger),
-  };
-  return {
-    pino: vi.fn(() => mockLogger),
-  };
-});
-
 vi.mock('./logger.js', () => {
-  const mockLogFn: import('pino').LogFn = vi.fn((obj: object | string, msg?: string, ...args: any[]) => {});
+  const mockLogFn: import('pino').LogFn = vi.fn(
+    (_obj: unknown, _msg?: string, ..._args: unknown[]) => {}
+  );
   const mockChildLogger = {
     info: mockLogFn,
     warn: mockLogFn,
@@ -140,7 +124,9 @@ describe('Worker Initialization', () => {
       silent: MockInstance;
       level: string;
     };
-    vi.spyOn(logger, 'child').mockReturnValue(jobLogSpy as ReturnType<typeof logger.child>);
+    vi.spyOn(logger, 'child').mockReturnValue(
+      jobLogSpy as unknown as ReturnType<typeof logger.child>,
+    );
 
     vi.spyOn(process, 'on').mockImplementation((event, handler) => {
       if (event === 'SIGTERM') sigtermHandler = handler as (...args: unknown[]) => unknown;
