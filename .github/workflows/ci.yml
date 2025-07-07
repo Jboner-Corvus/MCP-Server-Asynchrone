@@ -6,12 +6,15 @@ on:
   # Se déclenche lors d'une nouvelle pull request ou d'une mise à jour
   pull_request:
     branches:
-      - main  # Adaptez si votre branche principale a un autre nom
+      - main # Adaptez si votre branche principale a un autre nom
 
   # Se déclenche également lors d'un push sur la branche principale
   push:
     branches:
       - main
+
+  # Permet de lancer le workflow manuellement depuis l'onglet "Actions" de GitHub
+  workflow_dispatch:
 
 jobs:
   # Job unique qui va exécuter toutes nos étapes de validation
