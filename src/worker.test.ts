@@ -125,7 +125,7 @@ describe('Worker Initialization', () => {
       level: string;
     };
     vi.spyOn(logger, 'child').mockReturnValue(
-      jobLogSpy as unknown as ReturnType<typeof logger.child>,
+      jobLogSpy as unknown as ReturnType<typeof logger.child>
     );
 
     vi.spyOn(process, 'on').mockImplementation((event, handler) => {
