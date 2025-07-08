@@ -19,11 +19,11 @@ importers:
         specifier: ^5.56.1
         version: 5.56.1
       dotenv:
-        specifier: ^16.6.1
-        version: 16.6.1
+        specifier: ^17.1.0
+        version: 17.1.0
       fastmcp:
-        specifier: 3.7.0
-        version: 3.7.0
+        specifier: 3.8.2
+        version: 3.8.2
       pino:
         specifier: ^9.7.0
         version: 9.7.0
@@ -38,8 +38,8 @@ importers:
         specifier: ^24.0.1
         version: 24.0.1
       '@types/node':
-        specifier: ^22.16.0
-        version: 22.16.0
+        specifier: ^24.0.10
+        version: 24.0.10
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.36.0
         version: 8.36.0(@typescript-eslint/parser@8.36.0(eslint@9.30.1)(typescript@5.8.3))(eslint@9.30.1)(typescript@5.8.3)
@@ -48,7 +48,7 @@ importers:
         version: 8.36.0(eslint@9.30.1)(typescript@5.8.3)
       '@vitest/coverage-v8':
         specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/node@22.16.0)(yaml@2.8.0))
+        version: 3.2.4(vitest@3.2.4(@types/node@24.0.10)(yaml@2.8.0))
       eslint:
         specifier: ^9.30.1
         version: 9.30.1
@@ -65,8 +65,8 @@ importers:
         specifier: ^5.5.1
         version: 5.5.1(eslint-config-prettier@10.1.5(eslint@9.30.1))(eslint@9.30.1)(prettier@3.6.2)
       globals:
-        specifier: ^15.15.0
-        version: 15.15.0
+        specifier: ^16.3.0
+        version: 16.3.0
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -81,7 +81,7 @@ importers:
         version: 3.6.2
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.16.0)(typescript@5.8.3)
+        version: 10.9.2(@types/node@24.0.10)(typescript@5.8.3)
       tsconfig-paths:
         specifier: ^4.2.0
         version: 4.2.0
@@ -90,10 +90,10 @@ importers:
         version: 5.8.3
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.8.3)(vite@7.0.2(@types/node@22.16.0)(yaml@2.8.0))
+        version: 5.1.4(typescript@5.8.3)(vite@7.0.2(@types/node@24.0.10)(yaml@2.8.0))
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@22.16.0)(yaml@2.8.0)
+        version: 3.2.4(@types/node@24.0.10)(yaml@2.8.0)
 
 packages:
 
@@ -590,8 +590,8 @@ packages:
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
 
-  '@types/node@22.16.0':
-    resolution: {integrity: sha512-B2egV9wALML1JCpv3VQoQ+yesQKAmNMBIAY7OteVrikcOcAkWm+dGL6qpeCktPjAv6N1JLnhbNiqS35UpFyBsQ==}
+  '@types/node@24.0.10':
+    resolution: {integrity: sha512-ENHwaH+JIRTDIEEbDK6QSQntAYGtbvdDXnMXnZaZ6k13Du1dPMmprkEHIL7ok2Wl2aZevetwTAb5S+7yIF+enA==}
 
   '@typescript-eslint/eslint-plugin@8.36.0':
     resolution: {integrity: sha512-lZNihHUVB6ZZiPBNgOQGSxUASI7UJWhT8nHyUGCnaQ28XFCw98IfrMCG3rUl1uwUWoAvodJQby2KTs79UTcrAg==}
@@ -1066,8 +1066,8 @@ packages:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
     engines: {node: '>=0.10.0'}
 
-  dotenv@16.6.1:
-    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+  dotenv@17.1.0:
+    resolution: {integrity: sha512-tG9VUTJTuju6GcXgbdsOuRhupE8cb4mRgY5JLRCh4MtGoVo3/gfGUtOMwmProM6d0ba2mCFvv+WrpYJV6qgJXQ==}
     engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
@@ -1331,8 +1331,8 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fastmcp@3.7.0:
-    resolution: {integrity: sha512-TCV6L/SiXgqZhbCcArDlid0NHK0bSXYR0/2XVKyTlDYm3a5k5YKdz7MxlVZlkoKWFvodcsxMGgY8sDKVQfERhg==}
+  fastmcp@3.8.2:
+    resolution: {integrity: sha512-GN8SBv2+vm+PYbckvT8ZVZvjxkkIaQhgoGp3WrJ28AlJVt1wmd8S332L7o7SfuFzyYA4kwT2ofEtYJtRlm/mcw==}
     hasBin: true
 
   fastq@1.19.1:
@@ -1458,8 +1458,8 @@ packages:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
 
-  globals@15.15.0:
-    resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
+  globals@16.3.0:
+    resolution: {integrity: sha512-bqWEnJ1Nt3neqx2q5SFfGS8r/ahumIakg3HcwtNlrVlwXIeNumWn/c7Pn/wKzGhf6SaW6H6uWXLqC30STCMchQ==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -2466,8 +2466,8 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+  undici-types@7.8.0:
+    resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
   undici@7.11.0:
     resolution: {integrity: sha512-heTSIac3iLhsmZhUCjyS3JQEkZELateufzZuBaVM5RHXdSBMb1LPMQf5x+FH7qjsZYDP0ttAc3nnVpUB+wYbOg==}
@@ -2627,8 +2627,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  xsschema@0.3.0-beta.3:
-    resolution: {integrity: sha512-8fKI0Kqxs7npz3ElebNCeGdS0HDuS2qL3IqHK5O53yCdh419hcr3GQillwN39TNFasHjbMLQ+DjSwpY0NONdnQ==}
+  xsschema@0.3.0-beta.5:
+    resolution: {integrity: sha512-NYMPzYegZpL+zpTMswdg41+mmcyCkym38nvsZvPAHPDAOiOT8zAXrE28XvwyQDMsLuGE51IsJ+07RHYqTh4PUQ==}
     peerDependencies:
       '@valibot/to-json-schema': ^1.0.0
       arktype: ^2.1.16
@@ -3064,9 +3064,9 @@ snapshots:
 
   '@types/json5@0.0.29': {}
 
-  '@types/node@22.16.0':
+  '@types/node@24.0.10':
     dependencies:
-      undici-types: 6.21.0
+      undici-types: 7.8.0
 
   '@typescript-eslint/eslint-plugin@8.36.0(@typescript-eslint/parser@8.36.0(eslint@9.30.1)(typescript@5.8.3))(eslint@9.30.1)(typescript@5.8.3)':
     dependencies:
@@ -3219,7 +3219,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.0':
     optional: true
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@22.16.0)(yaml@2.8.0))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@24.0.10)(yaml@2.8.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -3234,7 +3234,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@22.16.0)(yaml@2.8.0)
+      vitest: 3.2.4(@types/node@24.0.10)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3246,13 +3246,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.2.4(vite@7.0.2(@types/node@22.16.0)(yaml@2.8.0))':
+  '@vitest/mocker@3.2.4(vite@7.0.2(@types/node@24.0.10)(yaml@2.8.0))':
     dependencies:
       '@vitest/spy': 3.2.4
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 7.0.2(@types/node@22.16.0)(yaml@2.8.0)
+      vite: 7.0.2(@types/node@24.0.10)(yaml@2.8.0)
 
   '@vitest/pretty-format@3.2.4':
     dependencies:
@@ -3580,7 +3580,7 @@ snapshots:
     dependencies:
       esutils: 2.0.3
 
-  dotenv@16.6.1: {}
+  dotenv@17.1.0: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -3968,7 +3968,7 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fastmcp@3.7.0:
+  fastmcp@3.8.2:
     dependencies:
       '@modelcontextprotocol/sdk': 1.15.0
       '@standard-schema/spec': 1.0.0
@@ -3979,7 +3979,7 @@ snapshots:
       strict-event-emitter-types: 2.0.0
       undici: 7.11.0
       uri-templates: 0.2.0
-      xsschema: 0.3.0-beta.3(zod-to-json-schema@3.24.6(zod@3.25.75))(zod@3.25.75)
+      xsschema: 0.3.0-beta.5(zod-to-json-schema@3.24.6(zod@3.25.75))(zod@3.25.75)
       yargs: 18.0.0
       zod: 3.25.75
       zod-to-json-schema: 3.24.6(zod@3.25.75)
@@ -4131,7 +4131,7 @@ snapshots:
 
   globals@14.0.0: {}
 
-  globals@15.15.0: {}
+  globals@16.3.0: {}
 
   globalthis@1.0.4:
     dependencies:
@@ -5112,14 +5112,14 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  ts-node@10.9.2(@types/node@22.16.0)(typescript@5.8.3):
+  ts-node@10.9.2(@types/node@24.0.10)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.16.0
+      '@types/node': 24.0.10
       acorn: 8.15.0
       acorn-walk: 8.3.4
       arg: 4.1.3
@@ -5203,7 +5203,7 @@ snapshots:
       has-symbols: 1.1.0
       which-boxed-primitive: 1.1.1
 
-  undici-types@6.21.0: {}
+  undici-types@7.8.0: {}
 
   undici@7.11.0: {}
 
@@ -5247,13 +5247,13 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-node@3.2.4(@types/node@22.16.0)(yaml@2.8.0):
+  vite-node@3.2.4(@types/node@24.0.10)(yaml@2.8.0):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 7.0.2(@types/node@22.16.0)(yaml@2.8.0)
+      vite: 7.0.2(@types/node@24.0.10)(yaml@2.8.0)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -5268,18 +5268,18 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@7.0.2(@types/node@22.16.0)(yaml@2.8.0)):
+  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@7.0.2(@types/node@24.0.10)(yaml@2.8.0)):
     dependencies:
       debug: 4.4.1
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.8.3)
     optionalDependencies:
-      vite: 7.0.2(@types/node@22.16.0)(yaml@2.8.0)
+      vite: 7.0.2(@types/node@24.0.10)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@7.0.2(@types/node@22.16.0)(yaml@2.8.0):
+  vite@7.0.2(@types/node@24.0.10)(yaml@2.8.0):
     dependencies:
       esbuild: 0.25.6
       fdir: 6.4.6(picomatch@4.0.2)
@@ -5288,15 +5288,15 @@ snapshots:
       rollup: 4.44.2
       tinyglobby: 0.2.14
     optionalDependencies:
-      '@types/node': 22.16.0
+      '@types/node': 24.0.10
       fsevents: 2.3.3
       yaml: 2.8.0
 
-  vitest@3.2.4(@types/node@22.16.0)(yaml@2.8.0):
+  vitest@3.2.4(@types/node@24.0.10)(yaml@2.8.0):
     dependencies:
       '@types/chai': 5.2.2
       '@vitest/expect': 3.2.4
-      '@vitest/mocker': 3.2.4(vite@7.0.2(@types/node@22.16.0)(yaml@2.8.0))
+      '@vitest/mocker': 3.2.4(vite@7.0.2(@types/node@24.0.10)(yaml@2.8.0))
       '@vitest/pretty-format': 3.2.4
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -5314,11 +5314,11 @@ snapshots:
       tinyglobby: 0.2.14
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 7.0.2(@types/node@22.16.0)(yaml@2.8.0)
-      vite-node: 3.2.4(@types/node@22.16.0)(yaml@2.8.0)
+      vite: 7.0.2(@types/node@24.0.10)(yaml@2.8.0)
+      vite-node: 3.2.4(@types/node@24.0.10)(yaml@2.8.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.16.0
+      '@types/node': 24.0.10
     transitivePeerDependencies:
       - jiti
       - less
@@ -5405,7 +5405,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  xsschema@0.3.0-beta.3(zod-to-json-schema@3.24.6(zod@3.25.75))(zod@3.25.75):
+  xsschema@0.3.0-beta.5(zod-to-json-schema@3.24.6(zod@3.25.75))(zod@3.25.75):
     optionalDependencies:
       zod: 3.25.75
       zod-to-json-schema: 3.24.6(zod@3.25.75)
